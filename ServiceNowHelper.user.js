@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.0
+// @version      1.1
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -98,16 +98,15 @@ if (snMain !== null){
         var post = document.getElementsByClassName('btn btn-default pull-right activity-submit')[0];
         var fromV = document.getElementById('sys_display.incident.assignment_group').value;
         var toV1 = document.getElementById('activity-stream-textarea');
-        //    var toV2 = document.getElementById('activity-stream-work_notes-textarea');
-        //    var check = document.getElementById('activity-stream-work_notes-textarea').parentElement.parentElement.parentElement.parentElement.className
-        //    if (check == 'ng-hide'){
-        toV1.value += "Transferring to " + fromV + ".";
-        angular.element(jQuery('#activity-stream-textarea')).triggerHandler('input')
-        //    } else {
-        //        toV2.value += "Transferring to " + fromV + ".";
-        //        toV2.classList = [];
-        //        angular.element(jQuery('#activity-stream-textarea')).triggerHandler('input')
-        //    };
+        var toV2 = document.getElementById('activity-stream-work_notes-textarea');
+        var check = document.getElementById('activity-stream-work_notes-textarea').parentElement.parentElement.parentElement.parentElement.className
+        if (check == 'ng-hide'){
+            toV1.value += "Transferring to " + fromV + ".";
+            angular.element(jQuery('#activity-stream-textarea')).triggerHandler('input')
+        } else if (check == "") {
+            toV2.value += "Transferring to " + fromV + ".";
+            angular.element(jQuery('#activity-stream-work_notes-textarea')).triggerHandler('input')
+        };
     };
 
     function RFC(){
