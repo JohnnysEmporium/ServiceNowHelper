@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.3.1
+// @version      1.4
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -65,6 +65,11 @@ if (snMain !== null){
 
     var toV1 = document.getElementById('activity-stream-textarea');
     var toV2 = document.getElementById('activity-stream-work_notes-textarea');
+    var incState = document.getElementById('incident.incident_state');
+    var incSubState = document.getElementById('incident.u_sub_status');
+    var incResCat = document.getElementById('incident.u_resolution_category');
+    var incSubCat = document.getElementById('incident.u_resolution_sub_category');
+    var incClsNod = document.getElementById('incident.close_code');
 
     function CreateButton(){
         var beforeNodeT = document.getElementsByClassName('vsplit col-sm-6')[3];
@@ -95,7 +100,7 @@ if (snMain !== null){
         newNodeResolve.style.color = "red"
         lowerDiv.style.cssText = "margin-left: 312px; margin-bottom: 8px;";
         upperDiv.style.cssText = "margin-left: 312px; margin-bottom: 8px;";
-        newNodeReoc.style.cssText = "color: red; position: relative; left: 25px; display: none;";
+        newNodeReoc.style.cssText = "color: red; position: relative; left: 75px;";
         newNodeKB.style.cssText = "color: red; position: relative; left: 50px;";
         newNodeRFCend.style.cssText = "color: red; position: relative; left: 50px";
         newNodeRfc.style.cssText = "position: relative; left: 25px; color: red;";
@@ -111,7 +116,7 @@ if (snMain !== null){
         upperDiv.appendChild(newNodeResolve);
         upperDiv.appendChild(newNodeRfc);
         upperDiv.appendChild(newNodeRFCend);
-        lowerDiv.appendChild(newNodeReoc);
+        upperDiv.appendChild(newNodeReoc);
         lowerDiv.appendChild(newNodeKB);
         EvListener();
     };
@@ -120,7 +125,7 @@ if (snMain !== null){
         console.log('ev start');
         document.getElementById('TransferringTo').addEventListener('click', transfer, false);
         document.getElementById('RFC').addEventListener('click', RFC, false);
-        //        document.getElementById('Reoccurrence').addEventListener('click', reoc, false);
+        document.getElementById('Reoccurrence').addEventListener('click', reoc, false);
         document.getElementById('KB_open').addEventListener('click', KB, false);
         document.getElementById('RFCend').addEventListener('click', function(){check(2)}, false);
         document.getElementById('autoResolve').addEventListener('click', function(){check(1)}, false);
@@ -141,7 +146,7 @@ if (snMain !== null){
         var numb = window.prompt('Enter RFC number');
         var date = window.prompt('When the RFC ends?');
         var text = "RFC" + numb + " closing incident at " + date;
-        var incState = document.getElementById('incident.incident_state');
+        incState = document.getElementById('incident.incident_state');
         pasteAndPush(text);
         if (incState.value == 1){
             incState.value = 2;
@@ -150,10 +155,9 @@ if (snMain !== null){
     };
 
     function reoc(){
-        var incState = document.getElementById('incident.incident_state');
-        if (incState.vlaue !== 6){
-            alert('Incident must be closed in order to reopen it');
-        } else {
+        incState = document.getElementById('incident.incident_state');
+        console.log(incState.value);
+        if (incState.value == 6){
             var text = "Alert reoccurrence."
             var reopen = document.getElementById('incident.u_reopen_reason');
             incState.value = 1;
@@ -163,6 +167,8 @@ if (snMain !== null){
                 reopen.value = "Re-occurrence";
                 reopen.onchange();
             },300);
+        } else {
+            alert('Incident must be closed in order to reopen it');
         };
     };
 
@@ -188,14 +194,6 @@ if (snMain !== null){
     CreateButton();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    const incState = document.getElementById('incident.incident_state');
-    const incSubState = document.getElementById('incident.u_sub_status');
-    const incResCat = document.getElementById('incident.u_resolution_category');
-    const incSubCat = document.getElementById('incident.u_resolution_sub_category');
-    const incClsNod = document.getElementById('incident.close_code');
-
-
 
     function incStateFunc(){
         incState.value = 6;
