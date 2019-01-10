@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.2
+// @version      1.3
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -62,152 +62,220 @@ if (snMain !== null){
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 } else if (snInc !== null) {
     console.log('AR and AT');
-    function ATfunction(){
-        function CreateButton(){
-            var beforeNodeT = document.getElementsByClassName('vsplit col-sm-6')[3];
-            var targetNodeT = document.getElementById('element.incident.assignment_group');
-            var newDiv = document.createElement('div');
-            var newNodeT = document.createElement('span');
-            var newNodeR = document.createElement('span');
-            var textT = document.createTextNode('Transfer');
-            var textR = document.createTextNode('RFC');
-            newDiv.setAttribute('id', 'newDiv');
-            newNodeT.setAttribute('id', 'TransferringTo');
-            newNodeR.setAttribute('id', 'RFC');
-            newDiv.style.marginLeft = "312px";
-            newDiv.style.marginBottom = "8px";
-            newNodeR.style.position = "relative";
-            newNodeR.style.left = "30px";
-            newNodeR.style.color = "red";
-            newNodeT.style.color = "red";
-            newNodeT.appendChild(textT);
-            newNodeR.appendChild(textR);
-            beforeNodeT.insertBefore(newDiv, beforeNodeT.childNodes[9]);
-            newDiv.appendChild(newNodeT);
-            newDiv.appendChild(newNodeR);
-            EvListener();
-        };
 
-        function EvListener(){
-            var targetT = document.getElementById('TransferringTo');
-            var targetR = document.getElementById('RFC');
-            targetT.addEventListener('click', transfer, false);
-            targetR.addEventListener('click', RFC, false);
-        };
+    var toV1 = document.getElementById('activity-stream-textarea');
+    var toV2 = document.getElementById('activity-stream-work_notes-textarea');
 
-        function transfer(){
-            var post = document.getElementsByClassName('btn btn-default pull-right activity-submit')[0];
-            var fromV = document.getElementById('sys_display.incident.assignment_group').value;
-            var toV1 = document.getElementById('activity-stream-textarea');
-            var toV2 = document.getElementById('activity-stream-work_notes-textarea');
-            var check = document.getElementById('activity-stream-work_notes-textarea').parentElement.parentElement.parentElement.parentElement.className
-            if (check == 'ng-hide'){
-                toV1.value += "Transferring to " + fromV + ".";
-                angular.element(jQuery('#activity-stream-textarea')).triggerHandler('input')
-            } else if (check == "") {
-                toV2.value += "Transferring to " + fromV + ".";
-                angular.element(jQuery('#activity-stream-work_notes-textarea')).triggerHandler('input')
-            };
-        };
-
-        function RFC(){
-            var toV1 = document.getElementById('activity-stream-textarea');
-            var numb = window.prompt('Enter RFC number');
-            var date = window.prompt('When the RFC ends?');
-            toV1.value += "RFC" + numb + " closing incident at " + date;
-            angular.element(jQuery('#activity-stream-textarea')).triggerHandler('input')
-        };
-        CreateButton();
+    function CreateButton(){
+        var beforeNodeT = document.getElementsByClassName('vsplit col-sm-6')[3];
+        var beforeNodeR = document.getElementsByClassName('vsplit col-sm-6')[1];
+        var targetNodeT = document.getElementById('element.incident.assignment_group');
+        var lowerDiv = document.createElement('div');
+        var upperDiv = document.createElement('div');
+        var newNodeTran = document.createElement('span');
+        var newNodeRfc = document.createElement('span');
+        var newNodeReoc = document.createElement('span');
+        var newNodeKB = document.createElement('span');
+        var newNodeRFCend = document.createElement('span');
+        var newNodeResolve = document.createElement('span');
+        var newNodeiFrame = document.createElement('iframe');
+        var textTran = document.createTextNode('Transfer');
+        var textRfc = document.createTextNode('RFC');
+        var textReoc = document.createTextNode('Reoccurrence')
+        var textKB = document.createTextNode('KB');
+        var textRFCend = document.createTextNode('RFC end');
+        var textResolve = document.createTextNode('Resolve');
+        newNodeTran.setAttribute('id', 'TransferringTo');
+        newNodeRfc.setAttribute('id', 'RFC');
+        newNodeReoc.setAttribute('id', 'Reoccurrence')
+        newNodeKB.setAttribute('id', 'KB_open');
+        newNodeRFCend.setAttribute('id', 'RFCend');
+        newNodeResolve.setAttribute('id', 'autoResolve');
+        newNodeTran.style.color = "red";
+        newNodeResolve.style.color = "red"
+        lowerDiv.style.cssText = "margin-left: 312px; margin-bottom: 8px;";
+        upperDiv.style.cssText = "margin-left: 312px; margin-bottom: 8px;";
+        newNodeReoc.style.cssText = "color: red; position: relative; left: 25px; display: none;";
+        newNodeKB.style.cssText = "color: red; position: relative; left: 50px;";
+        newNodeRFCend.style.cssText = "color: red; position: relative; left: 50px";
+        newNodeRfc.style.cssText = "position: relative; left: 25px; color: red;";
+        newNodeTran.appendChild(textTran);
+        newNodeRfc.appendChild(textRfc);
+        newNodeReoc.appendChild(textReoc);
+        newNodeKB.appendChild(textKB);
+        newNodeRFCend.appendChild(textRFCend);
+        newNodeResolve.appendChild(textResolve);
+        beforeNodeT.insertBefore(lowerDiv, beforeNodeT.childNodes[9]);
+        beforeNodeR.insertBefore(upperDiv, beforeNodeR.childNodes[7]);
+        lowerDiv.appendChild(newNodeTran);
+        upperDiv.appendChild(newNodeResolve);
+        upperDiv.appendChild(newNodeRfc);
+        upperDiv.appendChild(newNodeRFCend);
+        lowerDiv.appendChild(newNodeReoc);
+        lowerDiv.appendChild(newNodeKB);
+        EvListener();
     };
-    ATfunction();
+
+    function EvListener(){
+        console.log('ev start');
+        document.getElementById('TransferringTo').addEventListener('click', transfer, false);
+        document.getElementById('RFC').addEventListener('click', RFC, false);
+//        document.getElementById('Reoccurrence').addEventListener('click', reoc, false);
+        document.getElementById('KB_open').addEventListener('click', KB, false);
+        document.getElementById('RFCend').addEventListener('click', function(){check(2)}, false);
+        document.getElementById('autoResolve').addEventListener('click', function(){check(1)}, false);
+        console.log('ev ends');
+    };
+
+    function transfer(){
+        console.log('transfer start');
+        var fromV = document.getElementById('sys_display.incident.assignment_group').value;
+        var check = document.getElementById('activity-stream-work_notes-textarea').parentElement.parentElement.parentElement.parentElement.className;
+        var text = "Transferring to " +fromV + ".";
+        console.log('before push');
+        pasteAndPush(text);
+        console.log('after push');
+    };
+
+    function RFC(){
+        var numb = window.prompt('Enter RFC number');
+        var date = window.prompt('When the RFC ends?');
+        var text = "RFC" + numb + " closing incident at " + date;
+        var incState = document.getElementById('incident.incident_state');
+        pasteAndPush(text);
+        if (incState.value == 1){
+            incState.value = 2;
+            incState.onchange();
+        };
+    };
+
+    function reoc(){
+        var incState = document.getElementById('incident.incident_state');
+        if (incState.vlaue !== 6){
+            alert('Incident must be closed in order to reopen it');
+        } else {
+            var text = "Alert reoccurrence."
+            var reopen = document.getElementById('incident.u_reopen_reason');
+            incState.value = 1;
+            incState.onchange();
+            pasteAndPush(text);
+            setTimeout(function(){
+                reopen.value = "Re-occurrence";
+                reopen.onchange();
+            },300);
+        };
+    };
+
+    function KB(){
+        var target = document.getElementById('incident.em_alert.incident_table').getElementsByClassName('list2_body')[0].getElementsByClassName('linked')[3].innerHTML;
+        //            if (target == null){
+        //                alert('There is no KB article for this alert');
+        //            } else {
+        window.open('https://arcelormittalprod.service-now.com' + target, '_blank');
+        //            };
+    };
+
+    function pasteAndPush(text){
+        var check = toV2.parentElement.parentElement.parentElement.parentElement.className;
+        if (check == 'ng-hide'){
+            toV1.value += text;
+            angular.element(jQuery('#activity-stream-textarea')).triggerHandler('input');
+        } else if (check == "") {
+            toV2.value += text;
+            angular.element(jQuery('#activity-stream-work_notes-textarea')).triggerHandler('input');
+        };
+    };
+    CreateButton();
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    function ARfunction(){
-        const incState = document.getElementById('incident.incident_state');
-        const incSubState = document.getElementById('incident.u_sub_status');
-        const incResCat = document.getElementById('incident.u_resolution_category');
-        const incSubCat = document.getElementById('incident.u_resolution_sub_category');
-        const incClsNod = document.getElementById('incident.close_code');
-        var act = incState.value;
-        var timer = setInterval(surveilence,500);
-        var incClsNodChilds = incClsNod.childElementCount;
-        var incSubCatChilds = incSubCat.childElementCount;
-        var mandatory = incSubState.childElementCount
+
+    const incState = document.getElementById('incident.incident_state');
+    const incSubState = document.getElementById('incident.u_sub_status');
+    const incResCat = document.getElementById('incident.u_resolution_category');
+    const incSubCat = document.getElementById('incident.u_resolution_sub_category');
+    const incClsNod = document.getElementById('incident.close_code');
 
 
-        function change1(){
-            mandatory = incSubState.childElementCount;
-            console.log(mandatory);
-            if (incSubState.value !== "Permanently Resolved"){
-                incSubState.value = "Permanently Resolved";
-                incSubState.onchange();
-                console.log("sub status changed")
-            } else {
-                console.log("sub status not changed")
-            };
-        };
 
-        function change2(){
-            incResCat.value = "Application";
-            incResCat.onchange();
-        };
-
-        function change3(){
-            incSubCatChilds = incSubCat.childElementCount;
-            if(incSubCat.value !== "Others" && incSubCatChilds > 30){
-                incSubCat.value = "Others";
-                incSubCat.onchange();
-                console.log("sub category changed");
-            } else if(incSubCat.value == "Others"){
-                return;
-            } else {
-                console.log("sub category not changed")
-                setTimeout(function(){
-                    change3();
-                },50);
-            };
-        };
-
-        function change4(){
-            incClsNodChilds = incClsNod.childElementCount;
-            if(incClsNod.value !== "Other" && incSubCat.value == "Others" ){
-                incClsNod.value = "Other";
-                incClsNod.onchange();
-                console.log("resolution code changed")
-            } else if(incClsNod.value == "Other"){
-                return;
-            } else {
-                console.log("resolution code not changed")
-                setTimeout(function(){
-                    change4();
-                },50);
-            };
-        };
-
-        function surveilence(){
-            if (incSubState.value !== "Permanently Resolved" || incSubCat.value !== "Others" || incClsNod.value !== "Other"){
-                check();
-            } else {
-                console.log("clear interval");
-                clearInterval(timer);
-            };
-        };
-
-        function check(){
-            console.log(act);
-            if(incState.value == 6 && incState.value != act){
-                if(incSubState.value !== "Permanently Resolved"){
-                    change1();
-                };
-                change2();
-                if(incSubCat.value !== "Others"){
-                    change3();
-                };
-                if(incClsNod.value !== "Other"){
-                    change4();
-                };
-            };
-        };
-
+    function incStateFunc(){
+        incState.value = 6;
+        incState.onchange();
     };
-    ARfunction();
+
+    function incSubStateFunc(){
+        incState.onchange();
+        incSubState.value = "Permanently Resolved";
+        incSubState.onchange();
+    };
+
+    function incResCatFunc(){
+        incSubState.onchange();
+        incResCat.value = "Application";
+        incResCat.onchange();
+    };
+
+    function incSubCatFunc(){
+        incResCat.onchange();
+        incSubCat.value = "Others";
+        incSubCat.onchange();
+    };
+
+    function incClsNodFunc(){
+        incSubCat.onchange()
+        incClsNod.value = "Other";
+        incClsNod.onchange();
+    };
+
+    function change(){
+        if(incState.value != 6){
+            console.log(incState.value);
+            incStateFunc();
+            console.log('CHANGED INC STATE');
+        };
+        if(incSubState.childElementCount == 8 && incSubState.value !== "Permanently Resolved"){
+            incSubStateFunc();
+            console.log('CHANGED INC SUB STATE');
+        };
+        if(incResCat.getAttribute('aria-required') == 'true' && incResCat.value !== "Application"){
+            incResCatFunc();
+            console.log('CHANGED INC RES CAT');
+        };
+        if(incSubCat.childElementCount > 30 && incSubCat.value !== "Others"){
+            incSubCatFunc();
+            console.log('CHANGED INC SUB CAT');
+        };
+        if(incClsNod.childElementCount == 6 && incClsNod.value !== "Other"){
+            incClsNodFunc();
+            console.log('CHANGED INC CLS NOD');
+        };
+        //if lower than 100, onchange() on  incSubCatFunc() will not fire
+        setTimeout(function(){
+            checker()
+        }, 100);
+    };
+
+    function checker(){
+        if(incState.value != 6 || incSubState.value !== "Permanently Resolved" || incResCat.value !== "Application" || incSubCat.value !== "Others" || incClsNod.value !== "Other"){
+            change()
+            console.log('change');
+        } else {
+            console.log('DONE');
+        };
+    };
+
+    function check(x){
+        switch(x){
+            case 1:
+                checker();
+                break;
+            case 2:
+                checker();
+                setTimeout(function(){
+                    document.getElementById('incident.close_notes').value = "RFC has ended.";
+                    angular.element(jQuery('#incident.close_notes')).triggerHandler('input');
+                    console.log('DONE');
+                },800);
+                break;
+        };
+    };
 };
