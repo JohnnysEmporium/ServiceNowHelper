@@ -120,7 +120,7 @@ if (snMain !== null){
         console.log('ev start');
         document.getElementById('TransferringTo').addEventListener('click', transfer, false);
         document.getElementById('RFC').addEventListener('click', RFC, false);
-//        document.getElementById('Reoccurrence').addEventListener('click', reoc, false);
+        //        document.getElementById('Reoccurrence').addEventListener('click', reoc, false);
         document.getElementById('KB_open').addEventListener('click', KB, false);
         document.getElementById('RFCend').addEventListener('click', function(){check(2)}, false);
         document.getElementById('autoResolve').addEventListener('click', function(){check(1)}, false);
@@ -264,18 +264,22 @@ if (snMain !== null){
     };
 
     function check(x){
-        switch(x){
-            case 1:
-                checker();
-                break;
-            case 2:
-                checker();
-                setTimeout(function(){
-                    document.getElementById('incident.close_notes').value = "RFC has ended.";
-                    angular.element(jQuery('#incident.close_notes')).triggerHandler('input');
-                    console.log('DONE');
-                },800);
-                break;
+        if (incState.value != 2){
+            alert('Incident status must be "Work in Progress" before resolving it');
+        } else {
+            switch(x){
+                case 1:
+                    checker();
+                    break;
+                case 2:
+                    checker();
+                    setTimeout(function(){
+                        document.getElementById('incident.close_notes').value = "RFC has ended.";
+                        angular.element(jQuery('#incident.close_notes')).triggerHandler('input');
+                        console.log('DONE');
+                    },800);
+                    break;
+            };
         };
     };
 };
