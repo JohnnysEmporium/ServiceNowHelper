@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.5
+// @version      1.5.1
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -191,9 +191,10 @@ if (snMain !== null){
 
     function RGPaste(){
         var RGpaste = GM_getValue('targetRG');
-        var text = "Transferring to " + RGpaste + "."
+        var text = "Transferring to " + RGpaste + ".";
         var assignment = document.getElementById('sys_display.incident.assignment_group');
-        assignment.focus()
+        assignment.focus();
+        assignment.value = "";
         setTimeout(function(){
             GM_setClipboard(RGpaste);
            // assignment.value = RGpaste;
@@ -313,3 +314,4 @@ if (snMain !== null){
     };
     RGcopy();
 };
+
