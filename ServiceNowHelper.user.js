@@ -1,20 +1,21 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.4
+// @version      1.5
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
 // @downloadURL  https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
 // @updateURL    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @grant        none
+// @grant        GM_setValue
+// @grant        GM_getValue
 // ==/UserScript==
 
 'use strict';
 
 var snMain = document.getElementById('dropzone1');
 var snInc = document.getElementById('incident.form_header');
-
+var bodyCount = document.body.childElementCount;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 if (snMain !== null){
@@ -179,6 +180,11 @@ if (snMain !== null){
         //            } else {
         window.open('https://arcelormittalprod.service-now.com' + target, '_blank');
         //            };
+        setTimeout(function(){
+            var RGpaste = GM_getValue('targetRG');
+            var text = "Transferring to " + RGpaste + "."
+            pasteAndPush(text);
+        }, 3000);
     };
 
     function pasteAndPush(text){
@@ -280,4 +286,17 @@ if (snMain !== null){
             };
         };
     };
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+} else if (bodyCount < 45){
+    console.log('AutoTransfer');
+    function RGcopy(){
+        var KBRG = document.getElementById('article').childNodes[4].childNodes[0].innerHTML.substring(0,24);
+        if(KBRG = "Transfer the incident to"){
+            var RG = document.getElementById('article').childNodes[4].childNodes[0].innerHTML.substring(27,200).slice(0,-3);
+            GM_setValue('targetRG', RG);
+            window.close();
+        };
+    };
+    RGcopy();
 };
+
