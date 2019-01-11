@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.5.2
+// @version      1.5.3
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -9,7 +9,6 @@
 // @updateURL    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
 // @grant        GM_setValue
 // @grant        GM_getValue
-// @grant        GM_setClipboard
 // ==/UserScript==
 
 'use strict';
@@ -92,14 +91,14 @@ if (snMain !== null){
         var textKB = document.createTextNode('KB');
         var textRFCend = document.createTextNode('RFC end');
         var textResolve = document.createTextNode('Resolve');
-        var textRGPaste = document.createTextNode('RG Paste');
+//        var textRGPaste = document.createTextNode('RG Paste');
         newNodeTran.setAttribute('id', 'TransferringTo');
         newNodeRfc.setAttribute('id', 'RFC');
         newNodeReoc.setAttribute('id', 'Reoccurrence')
         newNodeKB.setAttribute('id', 'KB_open');
         newNodeRFCend.setAttribute('id', 'RFCend');
         newNodeResolve.setAttribute('id', 'autoResolve');
-        newNodeRGPaste.setAttribute('id', 'RGPaste');
+//        newNodeRGPaste.setAttribute('id', 'RGPaste');
         newNodeTran.style.color = "red";
         newNodeResolve.style.color = "red"
         lowerDiv.style.cssText = "margin-left: 312px; margin-bottom: 8px;";
@@ -108,14 +107,14 @@ if (snMain !== null){
         newNodeKB.style.cssText = "color: red; position: relative; left: 25px;";
         newNodeRFCend.style.cssText = "color: red; position: relative; left: 50px";
         newNodeRfc.style.cssText = "position: relative; left: 25px; color: red;";
-        newNodeRGPaste.style.cssText = "position: relative; left: 50px; color: red;";
+//        newNodeRGPaste.style.cssText = "position: relative; left: 50px; color: red;";
         newNodeTran.appendChild(textTran);
         newNodeRfc.appendChild(textRfc);
         newNodeReoc.appendChild(textReoc);
         newNodeKB.appendChild(textKB);
         newNodeRFCend.appendChild(textRFCend);
         newNodeResolve.appendChild(textResolve);
-        newNodeRGPaste.appendChild(textRGPaste);
+//        newNodeRGPaste.appendChild(textRGPaste);
         beforeNodeT.insertBefore(lowerDiv, beforeNodeT.childNodes[9]);
         beforeNodeR.insertBefore(upperDiv, beforeNodeR.childNodes[7]);
         lowerDiv.appendChild(newNodeTran);
@@ -124,7 +123,7 @@ if (snMain !== null){
         upperDiv.appendChild(newNodeRFCend);
         upperDiv.appendChild(newNodeReoc);
         lowerDiv.appendChild(newNodeKB);
-        lowerDiv.appendChild(newNodeRGPaste);
+//        lowerDiv.appendChild(newNodeRGPaste);
         EvListener();
     };
 
@@ -136,7 +135,7 @@ if (snMain !== null){
         document.getElementById('KB_open').addEventListener('click', KB, false);
         document.getElementById('RFCend').addEventListener('click', function(){check(2)}, false);
         document.getElementById('autoResolve').addEventListener('click', function(){check(1)}, false);
-        document.getElementById('RGPaste').addEventListener('click', RGPaste, false);
+//        document.getElementById('RGPaste').addEventListener('click', RGPaste, false);
         console.log('ev ends');
     };
 
@@ -187,6 +186,7 @@ if (snMain !== null){
         //            } else {
         window.open('https://arcelormittalprod.service-now.com' + target, '_blank');
         //            };
+        setTimeout(RGPaste, 3000);
     };
 
     function RGPaste(){
@@ -194,12 +194,13 @@ if (snMain !== null){
         var text = "Transferring to " + RGpaste + ".";
         var assignment = document.getElementById('sys_display.incident.assignment_group');
         assignment.focus();
-        assignment.value = "";
         setTimeout(function(){
-            GM_setClipboard(RGpaste);
-           // assignment.value = RGpaste;
+            assignment.value = RGpaste;
             pasteAndPush(text);
-        },500);
+            setTimeout(function(){
+                assignment.blur();
+            },200);
+        },200);
     };
 
     function pasteAndPush(text){
@@ -314,4 +315,3 @@ if (snMain !== null){
     };
     RGcopy();
 };
-
