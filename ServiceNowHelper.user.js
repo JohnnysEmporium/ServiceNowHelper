@@ -7,14 +7,16 @@
 // @match        https://arcelormittalprod.service-now.com/*
 // @downloadURL  https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
 // @updateURL    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @grant        none
+// @grant        GM_setValue
+// @grant        GM_getValue
+// @grant        GM_setClipboard
 // ==/UserScript==
 
 'use strict';
 
 var snMain = document.getElementById('dropzone1');
 var snInc = document.getElementById('incident.form_header');
-
+var bodyCount = document.body.childElementCount;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 if (snMain !== null){
@@ -83,33 +85,37 @@ if (snMain !== null){
         var newNodeKB = document.createElement('span');
         var newNodeRFCend = document.createElement('span');
         var newNodeResolve = document.createElement('span');
-        var newNodeiFrame = document.createElement('iframe');
+        var newNodeRGPaste = document.createElement('span');
         var textTran = document.createTextNode('Transfer');
         var textRfc = document.createTextNode('RFC');
         var textReoc = document.createTextNode('Reoccurrence')
         var textKB = document.createTextNode('KB');
         var textRFCend = document.createTextNode('RFC end');
         var textResolve = document.createTextNode('Resolve');
+        var textRGPaste = document.createTextNode('RG Paste');
         newNodeTran.setAttribute('id', 'TransferringTo');
         newNodeRfc.setAttribute('id', 'RFC');
         newNodeReoc.setAttribute('id', 'Reoccurrence')
         newNodeKB.setAttribute('id', 'KB_open');
         newNodeRFCend.setAttribute('id', 'RFCend');
         newNodeResolve.setAttribute('id', 'autoResolve');
+        newNodeRGPaste.setAttribute('id', 'RGPaste');
         newNodeTran.style.color = "red";
         newNodeResolve.style.color = "red"
         lowerDiv.style.cssText = "margin-left: 312px; margin-bottom: 8px;";
         upperDiv.style.cssText = "margin-left: 312px; margin-bottom: 8px;";
         newNodeReoc.style.cssText = "color: red; position: relative; left: 75px;";
-        newNodeKB.style.cssText = "color: red; position: relative; left: 50px;";
+        newNodeKB.style.cssText = "color: red; position: relative; left: 25px;";
         newNodeRFCend.style.cssText = "color: red; position: relative; left: 50px";
         newNodeRfc.style.cssText = "position: relative; left: 25px; color: red;";
+        newNodeRGPaste.style.cssText = "position: relative; left: 50px; color: red;";
         newNodeTran.appendChild(textTran);
         newNodeRfc.appendChild(textRfc);
         newNodeReoc.appendChild(textReoc);
         newNodeKB.appendChild(textKB);
         newNodeRFCend.appendChild(textRFCend);
         newNodeResolve.appendChild(textResolve);
+        newNodeRGPaste.appendChild(textRGPaste);
         beforeNodeT.insertBefore(lowerDiv, beforeNodeT.childNodes[9]);
         beforeNodeR.insertBefore(upperDiv, beforeNodeR.childNodes[7]);
         lowerDiv.appendChild(newNodeTran);
@@ -118,6 +124,7 @@ if (snMain !== null){
         upperDiv.appendChild(newNodeRFCend);
         upperDiv.appendChild(newNodeReoc);
         lowerDiv.appendChild(newNodeKB);
+        lowerDiv.appendChild(newNodeRGPaste);
         EvListener();
     };
 
@@ -129,6 +136,7 @@ if (snMain !== null){
         document.getElementById('KB_open').addEventListener('click', KB, false);
         document.getElementById('RFCend').addEventListener('click', function(){check(2)}, false);
         document.getElementById('autoResolve').addEventListener('click', function(){check(1)}, false);
+        document.getElementById('RGPaste').addEventListener('click', RGPaste, false);
         console.log('ev ends');
     };
 
@@ -179,6 +187,18 @@ if (snMain !== null){
         //            } else {
         window.open('https://arcelormittalprod.service-now.com' + target, '_blank');
         //            };
+    };
+
+    function RGPaste(){
+        var RGpaste = GM_getValue('targetRG');
+        var text = "Transferring to " + RGpaste + "."
+        var assignment = document.getElementById('sys_display.incident.assignment_group');
+        assignment.focus()
+        setTimeout(function(){
+            GM_setClipboard(RGpaste);
+           // assignment.value = RGpaste;
+            pasteAndPush(text);
+        },500);
     };
 
     function pasteAndPush(text){
@@ -280,4 +300,16 @@ if (snMain !== null){
             };
         };
     };
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+} else if (bodyCount < 45){
+    console.log('AutoTransfer');
+    function RGcopy(){
+        var KBRG = document.getElementById('article').childNodes[4].childNodes[0].innerHTML.substring(0,24);
+        if(KBRG == "Transfer the incident to"){
+            var RG = document.getElementById('article').childNodes[4].childNodes[0].innerHTML.substring(27,200).slice(0,-3);
+            GM_setValue('targetRG', RG);
+            window.close();
+        };
+    };
+    RGcopy();
 };
