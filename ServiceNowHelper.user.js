@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.5.1
+// @version      1.5.2
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -270,7 +270,7 @@ if (snMain !== null){
         //if lower than 100, onchange() on  incSubCatFunc() will not fire
         setTimeout(function(){
             checker()
-        }, 100);
+        }, 200);
     };
 
     function checker(){
