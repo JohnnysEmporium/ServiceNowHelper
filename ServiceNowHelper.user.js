@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.6.2
+// @version      1.6.3
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -170,14 +170,20 @@ if (snMain !== null){
     };
 
     function RFC(){
-        var numb = window.prompt('Enter RFC number');
-        var date = window.prompt('When the RFC ends?');
-        var text = "RFC" + numb + " closing incident at " + date;
-        incState = document.getElementById('incident.incident_state');
-        pasteAndPush(text);
         if (incState.value == 1){
+            var numb = window.prompt('Enter RFC number');
+            var date = window.prompt('When the RFC ends?');
+            var text = "RFC" + numb + " closing incident at " + date;
+            var final = document.getElementById('incident.assigned_to')
+            var userID = document.getElementById('add_me_locked.incident.watch_list').getAttribute('data-user-id');
+            incState = document.getElementById('incident.incident_state');
+            pasteAndPush(text);
+            document.getElementById('incident.assigned_to').value = userID;
+            final.onchange();
             incState.value = 2;
             incState.onchange();
+        } else {
+            alert('Incident status must be "Assigned" in order to change status to "Work in Progress"');
         };
     };
 
