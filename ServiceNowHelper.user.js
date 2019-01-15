@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.6
+// @version      1.6.1
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -244,31 +244,22 @@ if (snMain !== null){
 
     function incStateFunc(){
         incState.value = 6;
-        incState.onchange();
     };
 
     function incSubStateFunc(){
-        incState.onchange();
         incSubState.value = "Permanently Resolved";
-        incSubState.onchange();
     };
 
     function incResCatFunc(){
-        incSubState.onchange();
         incResCat.value = "Application";
-        incResCat.onchange();
     };
 
     function incSubCatFunc(){
-        incResCat.onchange();
         incSubCat.value = "Others";
-        incSubCat.onchange();
     };
 
     function incClsNodFunc(){
-        incSubCat.onchange()
         incClsNod.value = "Other";
-        incClsNod.onchange();
     };
 
     function change(){
@@ -276,22 +267,27 @@ if (snMain !== null){
             console.log(incState.value);
             incStateFunc();
             console.log('CHANGED INC STATE');
+            incState.onchange();
         };
         if(incSubState.childElementCount == 8 && incSubState.value !== "Permanently Resolved"){
             incSubStateFunc();
             console.log('CHANGED INC SUB STATE');
+            incSubState.onchange();
         };
         if(incResCat.getAttribute('aria-required') == 'true' && incResCat.value !== "Application"){
             incResCatFunc();
             console.log('CHANGED INC RES CAT');
+            incResCat.onchange();
         };
         if(incSubCat.childElementCount > 30 && incSubCat.value !== "Others"){
             incSubCatFunc();
             console.log('CHANGED INC SUB CAT');
+            incSubCat.onchange();
         };
         if(incClsNod.childElementCount == 6 && incClsNod.value !== "Other"){
             incClsNodFunc();
             console.log('CHANGED INC CLS NOD');
+            incClsNod.onchange();
         };
         //if lower than 100, onchange() on  incSubCatFunc() will not fire
         setTimeout(function(){
@@ -301,8 +297,8 @@ if (snMain !== null){
 
     function checker(){
         if(incState.value != 6 || incSubState.value !== "Permanently Resolved" || incResCat.value !== "Application" || incSubCat.value !== "Others" || incClsNod.value !== "Other"){
-            change()
             console.log('change');
+            change()
         } else {
             console.log('RESOLVING DONE');
         };
