@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.6.3
+// @version      1.6.4
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -175,10 +175,13 @@ if (snMain !== null){
             var date = window.prompt('When the RFC ends?');
             var text = "RFC" + numb + " closing incident at " + date;
             var final = document.getElementById('incident.assigned_to')
+            var finalDisplay = document.getElementById('sys_display.incident.assigned_to');
             var userID = document.getElementById('add_me_locked.incident.watch_list').getAttribute('data-user-id');
+            var uName = document.getElementById('add_me_locked.incident.watch_list').getAttribute('data-user');
             incState = document.getElementById('incident.incident_state');
             pasteAndPush(text);
-            document.getElementById('incident.assigned_to').value = userID;
+            finalDisplay.value = uName;
+            final.value = userID;
             final.onchange();
             incState.value = 2;
             incState.onchange();
