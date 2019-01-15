@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.5.3
+// @version      1.6
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -72,6 +72,26 @@ if (snMain !== null){
     var incSubCat = document.getElementById('incident.u_resolution_sub_category');
     var incClsNod = document.getElementById('incident.close_code');
 
+    function userAssign(){
+        var reqFor = document.getElementById('sys_display.incident.u_requested_for');
+        if(reqFor.value == ""){
+            setTimeout(function(){
+                console.log('Assign User START');
+                var userID = document.getElementById('add_me_locked.incident.watch_list').getAttribute('data-user-id');
+                var uName = document.getElementById('add_me_locked.incident.watch_list').getAttribute('data-user');
+                var final = document.getElementById('incident.u_requested_for');
+                reqFor.value = uName;
+                final.value = userID;
+                final.onchange();
+                reqFor.setAttribute('aria-activedescendant', 'ac_option_' + userID);
+                //  reqFor.blur();
+                console.log('end');
+            }, 5000);
+        };
+    };
+
+    userAssign();
+
     function CreateButton(){
         var beforeNodeT = document.getElementsByClassName('vsplit col-sm-6')[3];
         var beforeNodeR = document.getElementsByClassName('vsplit col-sm-6')[1];
@@ -91,14 +111,14 @@ if (snMain !== null){
         var textKB = document.createTextNode('KB');
         var textRFCend = document.createTextNode('RFC end');
         var textResolve = document.createTextNode('Resolve');
-//        var textRGPaste = document.createTextNode('RG Paste');
+        //        var textRGPaste = document.createTextNode('RG Paste');
         newNodeTran.setAttribute('id', 'TransferringTo');
         newNodeRfc.setAttribute('id', 'RFC');
         newNodeReoc.setAttribute('id', 'Reoccurrence')
         newNodeKB.setAttribute('id', 'KB_open');
         newNodeRFCend.setAttribute('id', 'RFCend');
         newNodeResolve.setAttribute('id', 'autoResolve');
-//        newNodeRGPaste.setAttribute('id', 'RGPaste');
+        //        newNodeRGPaste.setAttribute('id', 'RGPaste');
         newNodeTran.style.color = "red";
         newNodeResolve.style.color = "red"
         lowerDiv.style.cssText = "margin-left: 312px; margin-bottom: 8px;";
@@ -107,14 +127,14 @@ if (snMain !== null){
         newNodeKB.style.cssText = "color: red; position: relative; left: 25px;";
         newNodeRFCend.style.cssText = "color: red; position: relative; left: 50px";
         newNodeRfc.style.cssText = "position: relative; left: 25px; color: red;";
-//        newNodeRGPaste.style.cssText = "position: relative; left: 50px; color: red;";
+        //        newNodeRGPaste.style.cssText = "position: relative; left: 50px; color: red;";
         newNodeTran.appendChild(textTran);
         newNodeRfc.appendChild(textRfc);
         newNodeReoc.appendChild(textReoc);
         newNodeKB.appendChild(textKB);
         newNodeRFCend.appendChild(textRFCend);
         newNodeResolve.appendChild(textResolve);
-//        newNodeRGPaste.appendChild(textRGPaste);
+        //        newNodeRGPaste.appendChild(textRGPaste);
         beforeNodeT.insertBefore(lowerDiv, beforeNodeT.childNodes[9]);
         beforeNodeR.insertBefore(upperDiv, beforeNodeR.childNodes[7]);
         lowerDiv.appendChild(newNodeTran);
@@ -123,7 +143,7 @@ if (snMain !== null){
         upperDiv.appendChild(newNodeRFCend);
         upperDiv.appendChild(newNodeReoc);
         lowerDiv.appendChild(newNodeKB);
-//        lowerDiv.appendChild(newNodeRGPaste);
+        //        lowerDiv.appendChild(newNodeRGPaste);
         EvListener();
     };
 
@@ -135,7 +155,7 @@ if (snMain !== null){
         document.getElementById('KB_open').addEventListener('click', KB, false);
         document.getElementById('RFCend').addEventListener('click', function(){check(2)}, false);
         document.getElementById('autoResolve').addEventListener('click', function(){check(1)}, false);
-//        document.getElementById('RGPaste').addEventListener('click', RGPaste, false);
+        //        document.getElementById('RGPaste').addEventListener('click', RGPaste, false);
         console.log('ev ends');
     };
 
@@ -190,17 +210,22 @@ if (snMain !== null){
     };
 
     function RGPaste(){
-        var RGpaste = GM_getValue('targetRG');
-        var text = "Transferring to " + RGpaste + ".";
-        var assignment = document.getElementById('sys_display.incident.assignment_group');
-        assignment.focus();
-        setTimeout(function(){
-            assignment.value = RGpaste;
-            pasteAndPush(text);
+        var copy = GM_getValue('copy');
+        if(copy){
+            var RGpaste = GM_getValue('targetRG');
+            var text = "Transferring to " + RGpaste + ".";
+            var assignment = document.getElementById('sys_display.incident.assignment_group');
+            assignment.focus();
             setTimeout(function(){
-                assignment.blur();
+                assignment.value = RGpaste;
+                pasteAndPush(text);
+                setTimeout(function(){
+                    assignment.blur();
+                },200);
             },200);
-        },200);
+        } else {
+            console.log('KB other than transfer only');
+        }
     };
 
     function pasteAndPush(text){
@@ -279,7 +304,7 @@ if (snMain !== null){
             change()
             console.log('change');
         } else {
-            console.log('DONE');
+            console.log('RESOLVING DONE');
         };
     };
 
@@ -310,6 +335,7 @@ if (snMain !== null){
         if(KBRG == "Transfer the incident to"){
             var RG = document.getElementById('article').childNodes[4].childNodes[0].innerHTML.substring(27,200).slice(0,-3);
             GM_setValue('targetRG', RG);
+            GM_setValue('copy', true);
             window.close();
         };
     };
