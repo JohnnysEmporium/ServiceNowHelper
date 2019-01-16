@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.6.4
+// @version      1.6.5
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -73,17 +73,22 @@ if (snMain !== null){
     var incClsNod = document.getElementById('incident.close_code');
 
     function userAssign(){
-        var reqFor = document.getElementById('sys_display.incident.u_requested_for');
-        if(reqFor.value == ""){
+        var reqForVisible = document.getElementById('sys_display.incident.u_requested_for');
+        if(reqForVisible.value == ""){
             setTimeout(function(){
                 console.log('Assign User START');
                 var userID = document.getElementById('add_me_locked.incident.watch_list').getAttribute('data-user-id');
                 var uName = document.getElementById('add_me_locked.incident.watch_list').getAttribute('data-user');
-                var final = document.getElementById('incident.u_requested_for');
-                reqFor.value = uName;
-                final.value = userID;
-                final.onchange();
+                var reqFor = document.getElementById('incident.u_requested_for');
+                var assignedTo = document.getElementById('incident.assigned_to')
+                var assignedToVisible = document.getElementById('sys_display.incident.assigned_to');
+                reqForVisible.value = uName;
+                reqFor.value = userID;
+                reqFor.onchange();
                 reqFor.setAttribute('aria-activedescendant', 'ac_option_' + userID);
+                assignedToVisible.value = uName;
+                assignedTo.value = userID;
+                assignedTo.onchange();
                 //  reqFor.blur();
                 console.log('end');
             }, 5000);
@@ -254,22 +259,27 @@ if (snMain !== null){
 
     function incStateFunc(){
         incState.value = 6;
+            incState.onchange();
     };
 
     function incSubStateFunc(){
         incSubState.value = "Permanently Resolved";
+            incSubState.onchange();
     };
 
     function incResCatFunc(){
         incResCat.value = "Application";
+            incResCat.onchange();
     };
 
     function incSubCatFunc(){
         incSubCat.value = "Others";
+            incSubCat.onchange();
     };
 
     function incClsNodFunc(){
         incClsNod.value = "Other";
+            incClsNod.onchange();
     };
 
     function change(){
@@ -277,27 +287,25 @@ if (snMain !== null){
             console.log(incState.value);
             incStateFunc();
             console.log('CHANGED INC STATE');
-            incState.onchange();
         };
         if(incSubState.childElementCount == 8 && incSubState.value !== "Permanently Resolved"){
             incSubStateFunc();
             console.log('CHANGED INC SUB STATE');
-            incSubState.onchange();
         };
         if(incResCat.getAttribute('aria-required') == 'true' && incResCat.value !== "Application"){
             incResCatFunc();
             console.log('CHANGED INC RES CAT');
-            incResCat.onchange();
         };
         if(incSubCat.childElementCount > 30 && incSubCat.value !== "Others"){
             incSubCatFunc();
             console.log('CHANGED INC SUB CAT');
-            incSubCat.onchange();
         };
         if(incClsNod.childElementCount == 6 && incClsNod.value !== "Other"){
             incClsNodFunc();
             console.log('CHANGED INC CLS NOD');
-            incClsNod.onchange();
+        } else if(incSubCat.childElementCount > 30 && incSubCat.value !== "Others" && incClsNod.childElementCount !== 6){
+            incSubCat.onchange();
+            console.log("IncSubCat onchange");
         };
         //if lower than 100, onchange() on  incSubCatFunc() will not fire
         setTimeout(function(){
