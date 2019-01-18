@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.6.5
+// @version      1.7
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
+// @match        http://web-expl.appliarmony.net/OSP/RFC/*
 // @downloadURL  https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
 // @updateURL    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
 // @grant        GM_setValue
@@ -13,11 +14,13 @@
 
 'use strict';
 
+
+
 var snMain = document.getElementById('dropzone1');
 var snInc = document.getElementById('incident.form_header');
 var bodyCount = document.body.childElementCount;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//SNOW MAIN/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 if (snMain !== null){
     console.log('SNS');
     //ANCHOR TO THE ELEMENT THAT NEEDS TO BE MONITORED FOR PROPER ALERT HANDLING
@@ -60,7 +63,7 @@ if (snMain !== null){
             }, 1300);
         }, 1000);
     },60*1000);
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //INCIDENTS/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 } else if (snInc !== null) {
     console.log('AR and AT');
 
@@ -98,57 +101,60 @@ if (snMain !== null){
     userAssign();
 
     function CreateButton(){
-        var beforeNodeT = document.getElementsByClassName('vsplit col-sm-6')[3];
-        var beforeNodeR = document.getElementsByClassName('vsplit col-sm-6')[1];
+        var beforeNodeL = document.getElementsByClassName('vsplit col-sm-6')[3];
+        var beforeNodeU = document.getElementsByClassName('vsplit col-sm-6')[1];
         var targetNodeT = document.getElementById('element.incident.assignment_group');
         var lowerDiv = document.createElement('div');
         var upperDiv = document.createElement('div');
+        var middleDiv = document.createElement('div');
         var newNodeTran = document.createElement('span');
         var newNodeRfc = document.createElement('span');
         var newNodeReoc = document.createElement('span');
         var newNodeKB = document.createElement('span');
         var newNodeRFCend = document.createElement('span');
         var newNodeResolve = document.createElement('span');
-        var newNodeRGPaste = document.createElement('span');
+        //        var newNodeRFCPaste = document.createElement('span');
         var textTran = document.createTextNode('Transfer');
-        var textRfc = document.createTextNode('RFC');
+        var textRfc = document.createTextNode('RFC check');
         var textReoc = document.createTextNode('Reoccurrence')
         var textKB = document.createTextNode('KB');
         var textRFCend = document.createTextNode('RFC end');
         var textResolve = document.createTextNode('Resolve');
-        //        var textRGPaste = document.createTextNode('RG Paste');
+        var textRFCPaste = document.createTextNode('RFC Paste');
         newNodeTran.setAttribute('id', 'TransferringTo');
         newNodeRfc.setAttribute('id', 'RFC');
         newNodeReoc.setAttribute('id', 'Reoccurrence')
         newNodeKB.setAttribute('id', 'KB_open');
         newNodeRFCend.setAttribute('id', 'RFCend');
         newNodeResolve.setAttribute('id', 'autoResolve');
-        //        newNodeRGPaste.setAttribute('id', 'RGPaste');
+        //        newNodeRFCPaste.setAttribute('id', 'RFCPaste');
         newNodeTran.style.color = "red";
         newNodeResolve.style.color = "red"
         lowerDiv.style.cssText = "margin-left: 312px; margin-bottom: 8px;";
         upperDiv.style.cssText = "margin-left: 312px; margin-bottom: 8px;";
-        newNodeReoc.style.cssText = "color: red; position: relative; left: 75px;";
+        middleDiv.style.cssText = "margin-left: 312px; margin-bottom: 8px;";
+        newNodeReoc.style.cssText = "color: red; position: relative; left: 50px;";
         newNodeKB.style.cssText = "color: red; position: relative; left: 25px;";
-        newNodeRFCend.style.cssText = "color: red; position: relative; left: 50px";
-        newNodeRfc.style.cssText = "position: relative; left: 25px; color: red;";
-        //        newNodeRGPaste.style.cssText = "position: relative; left: 50px; color: red;";
+        newNodeRFCend.style.cssText = "color: red; position: relative; left: 25px";
+        newNodeRfc.style.cssText = "position: relative; left:; color: red;";
+        //        newNodeRFCPaste.style.cssText = "position: relative; left: 25px; color: red;";
         newNodeTran.appendChild(textTran);
         newNodeRfc.appendChild(textRfc);
         newNodeReoc.appendChild(textReoc);
         newNodeKB.appendChild(textKB);
         newNodeRFCend.appendChild(textRFCend);
         newNodeResolve.appendChild(textResolve);
-        //        newNodeRGPaste.appendChild(textRGPaste);
-        beforeNodeT.insertBefore(lowerDiv, beforeNodeT.childNodes[9]);
-        beforeNodeR.insertBefore(upperDiv, beforeNodeR.childNodes[7]);
+        //        newNodeRFCPaste.appendChild(textRFCPaste);
+        beforeNodeL.insertBefore(lowerDiv, beforeNodeL.childNodes[9]);
+        beforeNodeU.insertBefore(upperDiv, beforeNodeU.childNodes[7]);
+        beforeNodeL.insertBefore(middleDiv, beforeNodeL.childNodes[5]);
         lowerDiv.appendChild(newNodeTran);
         upperDiv.appendChild(newNodeResolve);
-        upperDiv.appendChild(newNodeRfc);
+        middleDiv.appendChild(newNodeRfc);
+        //        middleDiv.appendChild(newNodeRFCPaste);
         upperDiv.appendChild(newNodeRFCend);
         upperDiv.appendChild(newNodeReoc);
         lowerDiv.appendChild(newNodeKB);
-        //        lowerDiv.appendChild(newNodeRGPaste);
         EvListener();
     };
 
@@ -160,7 +166,7 @@ if (snMain !== null){
         document.getElementById('KB_open').addEventListener('click', KB, false);
         document.getElementById('RFCend').addEventListener('click', function(){check(2)}, false);
         document.getElementById('autoResolve').addEventListener('click', function(){check(1)}, false);
-        //        document.getElementById('RGPaste').addEventListener('click', RGPaste, false);
+        //        document.getElementById('RFCPaste').addEventListener('click', RFCPaste, false);
         console.log('ev ends');
     };
 
@@ -175,23 +181,36 @@ if (snMain !== null){
     };
 
     function RFC(){
-        if (incState.value == 1){
-            var numb = window.prompt('Enter RFC number');
-            var date = window.prompt('When the RFC ends?');
-            var text = "RFC" + numb + " closing incident at " + date;
+        GM_setValue('rfcTimeEnd', null);
+        GM_setValue('rfcNumber', null);
+        GM_setValue('isThereRfc', null);
+        var appServices = document.getElementById('sys_display.incident.cmdb_ci').value.toUpperCase();
+        GM_setValue('appServices', appServices);
+        window.open('http://web-expl.appliarmony.net/OSP/RFC/planning.asp?p=week&t=all&v=eqpt#', '_blank');
+        RFCPaste();
+    };
+
+    function RFCPaste(){
+        console.log('repeating');
+        var rfcTimeEnd = GM_getValue('rfcTimeEnd');
+        var rfcNumber = GM_getValue('rfcNumber');
+        if(rfcTimeEnd === null || rfcNumber === null){
+            var timeoutPaste;
+            timeoutPaste = setTimeout(RFCPaste, 1000);
+        }else if ((rfcTimeEnd && rfcNumber)){
+            var text = "RFC#" + rfcNumber + " closing incident at " + rfcTimeEnd + ".";
             var final = document.getElementById('incident.assigned_to')
             var finalDisplay = document.getElementById('sys_display.incident.assigned_to');
             var userID = document.getElementById('add_me_locked.incident.watch_list').getAttribute('data-user-id');
             var uName = document.getElementById('add_me_locked.incident.watch_list').getAttribute('data-user');
-            incState = document.getElementById('incident.incident_state');
+            var incState = document.getElementById('incident.incident_state');
             pasteAndPush(text);
             finalDisplay.value = uName;
             final.value = userID;
             final.onchange();
             incState.value = 2;
             incState.onchange();
-        } else {
-            alert('Incident status must be "Assigned" in order to change status to "Work in Progress"');
+            clearTimeout(timeoutPaste);
         };
     };
 
@@ -255,31 +274,31 @@ if (snMain !== null){
     };
     CreateButton();
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     function incStateFunc(){
         incState.value = 6;
-            incState.onchange();
+        incState.onchange();
     };
 
     function incSubStateFunc(){
         incSubState.value = "Permanently Resolved";
-            incSubState.onchange();
+        incSubState.onchange();
     };
 
     function incResCatFunc(){
         incResCat.value = "Application";
-            incResCat.onchange();
+        incResCat.onchange();
     };
 
     function incSubCatFunc(){
         incSubCat.value = "Others";
-            incSubCat.onchange();
+        incSubCat.onchange();
     };
 
     function incClsNodFunc(){
         incClsNod.value = "Other";
-            incClsNod.onchange();
+        incClsNod.onchange();
     };
 
     function change(){
@@ -319,6 +338,9 @@ if (snMain !== null){
             change()
         } else {
             console.log('RESOLVING DONE');
+            var tabs2 = document.getElementById('tabs2_section');
+            var dest = tabs2.childNodes[2].childNodes[0];
+            dest.click();
         };
     };
 
@@ -341,8 +363,10 @@ if (snMain !== null){
             };
         };
     };
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-} else if (bodyCount < 45){
+
+    //KNOWLEDGE BASE/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+} else if (document.URL.slice(0, 63) == "https://arcelormittalprod.service-now.com/kb_view.do?sys_kb_id="){
     console.log('AutoTransfer');
     function RGcopy(){
         var KBRG = document.getElementById('article').childNodes[4].childNodes[0].innerHTML.substring(0,24);
@@ -354,4 +378,212 @@ if (snMain !== null){
         };
     };
     RGcopy();
+};
+
+//RFC/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var serverNameCheck = GM_getValue('appServices');
+console.log(serverNameCheck);
+
+if((document.URL == 'http://web-expl.appliarmony.net/OSP/RFC/planning.asp?p=week&t=all&v=eqpt#') && (serverNameCheck != false)){
+    var dat = new Date();
+    var onSiteDate = document.getElementById('startDate').value;
+    var todaysDate = dat.getFullYear() + "-" + dat.getMonth() + 1 + "-" + dat.getDate()
+    var hour = dat.getHours();
+    var minute = dat.getMinutes();
+    //        if(hour >= 0 && hour <= 6){
+    //            todaysDate = dat.getFullYear() + "-" + dat.getMonth() + 1 + "-" + (dat.getDate() - 1)
+    if(onSiteDate == todaysDate){
+        checkIfCalendarPresent();
+        console.log('IFFFFFFFFFFF');
+    } else {
+        alert('Date is not correct\nchange it and refresh the site');
+    };
+    //        };
+
+    function checkIfCalendarPresent(){
+        var idCalendar = document.getElementById('calendar');
+        var serverName = GM_getValue('appServices');
+        if (idCalendar === null){
+            console.log('calendar doesnt exists');
+            setTimeout(checkIfCalendarPresent, 300);
+            idCalendar = document.getElementById('calendar')
+        } else {
+            console.log('calendar exists')
+            var br = document.getElementById('calendar').getElementsByTagName('td')[1].getElementsByTagName('br')
+            var brLength = br.length - 1;
+            serverFind(br, brLength, serverName);
+        };
+    };
+
+    function serverFind(brCall, brLengthCall, serverName){
+        var numb = [];
+        var i = 0;
+        while( i != brLengthCall){
+            numb.push(brCall[i].nextSibling.textContent.search(serverName));
+            i++;
+        };
+        console.log(numb);
+        openWindow(numb);
+    };
+
+    function openWindow(numbCall){
+        if(numbCall.some(el => el > -1)){
+            console.log('FOUND');
+            var numb = numbCall;
+            var rfcURLindex = numb.indexOf(Math.max(...numb));
+            console.log(rfcURLindex);
+            var rfcURL = document.getElementById('calendar').getElementsByTagName('td')[2].getElementsByTagName('a')[rfcURLindex].href;
+            window.open(rfcURL, '_blank');
+            GM_setValue('isThereRfc', true);
+            window.close();
+        } else {
+            var serverName = GM_getValue('appServices');
+            GM_setValue('isThereRfc', false);
+            GM_setValue('appServices', false);
+            GM_setValue('rfcTimeEnd', false);
+            GM_setValue('rfcNumber', false);
+            alert('There is no RFC for ' + serverName);
+            window.close();
+        };
+    };
+};
+
+if((document.URL.slice(0,-5) == "http://web-expl.appliarmony.net/OSP/RFC/valid.asp?ref=") && (serverNameCheck != false)){
+    console.log('after if');
+
+    var counter = 0;
+    GM_setValue('GMarr', null)
+
+    function checkIfRfcListPresent(){
+        var iwoList = document.getElementById('iwoList').childElementCount;
+        if (iwoList <= 1){
+            console.log('RFC list not loaded');
+            setTimeout(checkIfRfcListPresent, 300);
+            iwoList = document.getElementById('iwoList').childElementCount;
+        } else if (iwoList > 1){
+            console.log('RFC list loaded');
+            getRfc();
+        };
+    };
+
+    function getRfc(){
+        var serverName = GM_getValue('appServices');
+        var iwoList = document.getElementById('iwoList');
+        var labels = iwoList.getElementsByTagName('label');
+        var labelsLength = labels.length;
+        var labelsNew = []
+        var j = 0;
+        var i = 0;
+        var oldArr = [];
+        var arr = [];
+        for(j = 3; j < labelsLength; j = j + 8){
+            labelsNew.push(labels[j]);
+        };
+        while(i < labelsNew.length){
+            arr.push(labelsNew[i].nextSibling.textContent.search(serverName));
+            i++;
+        };
+        console.log(labelsNew);
+        console.log(arr);
+        GM_setValue('GMarr', arr)
+        valuesOtherThanMinusOne();
+    };
+
+    function valuesOtherThanMinusOne(){
+        var arr = GM_getValue('GMarr');
+        var i = 0
+        var outputArr = [];
+        while(i !== arr.length){
+            if(arr[i] !== -1){
+                outputArr.push(i);
+            };
+            i++
+        };
+        console.log(outputArr);
+        getLabelsWithDate(outputArr)
+    };
+
+    function getLabelsWithDate(outputArr){
+        console.log('run ' + counter);
+        var iwoList = document.getElementById('iwoList')
+        var target = iwoList.getElementsByClassName('quoteDiv')
+        if((counter + 1) <= outputArr.length){
+            var dateText = target[outputArr].getElementsByTagName('b')[0].textContent;
+            console.log(dateText);
+            assignDate(dateText);
+        } else {
+            var serverName = GM_getValue('appServices')
+            GM_setValue('appServices', false);
+            alert('There is no RFC for ' + serverName + ' at the present moment')
+            console.log('nothing found')
+            GM_setValue('rfcTimeEnd', false);
+            GM_setValue('rfcNumber', false);
+        };
+    };
+
+    function assignDate(el){
+        var startHour, startMinute, endHour, endMinute
+        var currentDate = new Date();
+        var changedDate1 = new Date();
+        var changedDate2 = new Date();
+        var year = el.slice(0,4);
+        var month = Number(el.slice(5,7)) - 1;
+        var day = el.slice(8,10)
+        var rfcTimeEnd
+        var rfcNumber
+        changedDate1.setFullYear(year, month, day);
+        changedDate2.setFullYear(year, month, day);
+        if(el.length == 25){
+            startHour = el.slice(11,13);
+            startMinute = el.slice(14,16);
+            endHour = el.slice(20,22);
+            endMinute = el.slice(23,25);
+        } else if(el.length == 24){
+            startHour = el.slice(11,12);
+            startMinute = el.slice(13,15);
+            endHour = el.slice(19,21);
+            endMinute = el.slice(22,24);
+        };
+        rfcTimeEnd = endHour + ':' + endMinute;
+        changedDate1.setHours(startHour);
+        changedDate1.setMinutes(startMinute);
+        changedDate2.setHours(endHour);
+        changedDate2.setMinutes(endMinute);
+        compareDate(currentDate.getDay(), changedDate1.getDay(), currentDate.getTime(), changedDate1.getTime(), changedDate2.getTime(), rfcTimeEnd);
+    };
+
+    function compareDate(currDay, chanDay, currDate, chanDateStart, chanDateEnd, rfcTimeEnd){
+        console.log(currDay + ',' + chanDay + ',' + currDate + ',' + chanDateStart + ',' + chanDateEnd + ',' + rfcTimeEnd);
+        if(currDay == chanDay){
+            if(currDate > chanDateStart && currDate < chanDateEnd){
+                console.log('RFC found, value to paste stored');
+                storeValue(rfcTimeEnd);
+                GM_setValue('appServices', false);
+                window.close();
+            } else if (currDate > (chanDateStart - 1800000) && currDate < (chanDateEnd + 1800000)){
+                alert('RFC is going to start or has already ended (time range is 30 minutes)\nDespite that, value has been stored and pasted into the Work Notes field')
+                storeValue(rfcTimeEnd);
+                GM_setValue('appServices', false);
+                window.close();
+            } else {
+                console.log('nothing found (time)');
+                counter++;
+                valuesOtherThanMinusOne();
+                window.close();
+            };
+        } else {
+            console.log('nothing found (date and time)');
+            counter++;
+            valuesOtherThanMinusOne();
+            window.close();
+        };
+    };
+
+    function storeValue(rfcTimeEnd){
+        var rfcNumber = document.URL.slice(-5);
+        GM_setValue('rfcNumber', rfcNumber);
+        GM_setValue('rfcTimeEnd', rfcTimeEnd);
+    };
+    checkIfRfcListPresent();
 };
