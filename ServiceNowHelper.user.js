@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.7.1
+// @version      1.7.2
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -52,9 +52,9 @@ function RUNALL(){
             function action(){
                 var ad = new Audio('http://newt.phys.unsw.edu.au/music/bellplates/sounds/equilateral_plate+second_partial.mp3');
                 if (anchor() > 5){
-                    //        setInterval(function(){
+                //            setInterval(function(){
                     ad.play();
-                    //        }, 500);
+                //            }, 500);
                 };
             };
 
@@ -436,7 +436,7 @@ function RUNALL(){
                     var numb = numbCall;
                     var rfcURLindex = numb.indexOf(Math.max(...numb));
                     console.log(rfcURLindex);
-                    var rfcURL = document.getElementById('calendar').getElementsByTagName('td')[2].getElementsByTagName('a')[rfcURLindex].href;
+                    var rfcURL = document.getElementById('calendar').getElementsByTagName('td')[1].getElementsByTagName('a')[rfcURLindex].href;
                     window.open(rfcURL, '_blank');
                     GM_setValue('isThereRfc', true);
                     window.close();
