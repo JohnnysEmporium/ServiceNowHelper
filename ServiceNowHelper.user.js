@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.7.2
+// @version      1.7.3
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -87,15 +87,15 @@ function RUNALL(){
                         var userID = document.getElementById('add_me_locked.incident.watch_list').getAttribute('data-user-id');
                         var uName = document.getElementById('add_me_locked.incident.watch_list').getAttribute('data-user');
                         var reqFor = document.getElementById('incident.u_requested_for');
-                        var assignedTo = document.getElementById('incident.assigned_to')
-                        var assignedToVisible = document.getElementById('sys_display.incident.assigned_to');
+                        //var assignedTo = document.getElementById('incident.assigned_to')
+                        //var assignedToVisible = document.getElementById('sys_display.incident.assigned_to');
                         reqForVisible.value = uName;
                         reqFor.value = userID;
                         reqFor.onchange();
                         reqFor.setAttribute('aria-activedescendant', 'ac_option_' + userID);
-                        assignedToVisible.value = uName;
-                        assignedTo.value = userID;
-                        assignedTo.onchange();
+                        //assignedToVisible.value = uName;
+                        //assignedTo.value = userID;
+                        //assignedTo.onchange();
                         //  reqFor.blur();
                         console.log('end');
                 };
@@ -377,7 +377,6 @@ function RUNALL(){
                     var RG = document.getElementById('article').childNodes[4].childNodes[0].innerHTML.substring(27,200).slice(0,-3);
                     GM_setValue('targetRG', RG);
                     GM_setValue('copy', true);
-                    window.close();
                 };
             };
             RGcopy();
