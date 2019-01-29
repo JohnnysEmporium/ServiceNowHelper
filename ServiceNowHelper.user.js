@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.7.5
+// @version      1.7.6
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -587,7 +587,7 @@ function RUNALL(){
                         storeValue(eD[i]);
                         ifFound = true;
                         break;
-                    } else if(cD < (sD - threshold) && cD > (eD + threshold)){
+                    } else if(cD > (sD.getTime() - threshold) && cD < (eD.getTime() + threshold)){
                         alert('RFC is going to start or has already ended (time range is 30 minutes)\nDespite that, value has been stored and pasted into the Work Notes field');
                         storeValue(eD[i]);
                         ifFound = true;
