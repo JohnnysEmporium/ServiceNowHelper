@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.7.6
+// @version      1.7.7
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -390,11 +390,15 @@ function RUNALL(){
         } else if (document.URL.slice(0, 63) == "https://arcelormittalprod.service-now.com/kb_view.do?sys_kb_id="){
             console.log('AutoTransfer');
             function RGcopy(){
-                var KBRG = document.getElementById('article').childNodes[4].childNodes[0].innerHTML.substring(0,24);
-                if(KBRG == "Transfer the incident to"){
-                    var RG = document.getElementById('article').childNodes[4].childNodes[0].innerHTML.substring(27,200).slice(0,-3);
+                var KBRG = document.getElementById('article').getElementsByTagName('p')[2];
+                var start, end, RG;
+                if(KBRG.textContent.slice(0,24) == "Transfer the incident to" && KBRG.childElementCount == 1){
+                    start = KBRG.textContent.search('«');
+                    end = KBRG.textContent.search('»');
+                    RG = KBRG.textContent.slice(start+2, end-1);
                     GM_setValue('targetRG', RG);
                     GM_setValue('copy', true);
+                    window.close();
                 };
             };
             RGcopy();
@@ -562,12 +566,19 @@ function RUNALL(){
             function getHours(arr, length){
                 var startDate = [];
                 var endDate = [];
+                var someDate = new Date();
                 var i = 0;
                 var j = 0;
                 while(i < length){
                     startDate.push(new Date(arr[i][0]));
                     if(arr[i][1].length > 7){
                         endDate.push(new Date(arr[i][1]));
+                    } else {
+                        if(arr[i][1].length == 4){
+                            endDate.push(new Date((someDate).setHours(arr[i][1].slice(0,1),(arr[i][1].slice(-2)))));
+                        } else {
+                            endDate.push(new Date((someDate).setHours(arr[i][1].slice(0,2),(arr[i][1].slice(-2)))));
+                        };
                     };
                     i++
                 };
@@ -576,24 +587,29 @@ function RUNALL(){
 
             function checkTime(sD, eD){
                 console.log('check');
+                console.log(eD);
                 var i = 0;
                 var cD = currentDate;
-                var threshold = 30*60*1000;
+                var threshold = 3*60*60*1000;
                 var ifFound;
                 while(i < sD.length){
-                    if(cD > sD[i] && cD < eD[i]){
-                        alert('RFC found, the data has been pasted in Work Notes field');
-                        console.log('RFC found, value to paste stored');
-                        storeValue(eD[i]);
-                        ifFound = true;
-                        break;
-                    } else if(cD > (sD.getTime() - threshold) && cD < (eD.getTime() + threshold)){
-                        alert('RFC is going to start or has already ended (time range is 30 minutes)\nDespite that, value has been stored and pasted into the Work Notes field');
-                        storeValue(eD[i]);
-                        ifFound = true;
-                        break;
-                    };
-                    i++;
+               //     if(eD && eD.constructor === Array && eD.length === 0){
+
+                 //   } else {
+                        if(cD > sD[i] && cD < eD[i]){
+                            alert('RFC found, the data has been pasted in Work Notes field');
+                            console.log('RFC found, value to paste stored');
+                            storeValue(eD[i]);
+                            ifFound = true;
+                            break;
+                        } else if(cD > (sD[i].getTime() - threshold) && cD < (eD[i].getTime() + threshold)){
+                            alert('RFC is going to start or has already ended (time range is 30 minutes)\nDespite that, value has been stored and pasted into the Work Notes field');
+                            storeValue(eD[i]);
+                            ifFound = true;
+                            break;
+                        };
+                        i++;
+              //      };
                 };
                 if(!ifFound){
                     alert('There is no RFC for ' + serverName + '\nBetter luck next time')
