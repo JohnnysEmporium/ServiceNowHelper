@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.7.7
+// @version      1.7.8
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -82,22 +82,22 @@ function RUNALL(){
 
             function userAssign(){
                 var reqForVisible = document.getElementById('sys_display.incident.u_requested_for');
-                if(reqForVisible.value == ""){
-                    console.log('Assign User START');
+                var assignmentGroup = document.getElementById('sys_display.incident.assignment_group');
+                if(reqForVisible.value == "" && assignmentGroup.value == "BD North - Infrastructure - Operations Bridge - HCL"){
+                    console.log('Assign User');
                     var userID = document.getElementById('add_me_locked.incident.watch_list').getAttribute('data-user-id');
                     var uName = document.getElementById('add_me_locked.incident.watch_list').getAttribute('data-user');
                     var reqFor = document.getElementById('incident.u_requested_for');
-                    //var assignedTo = document.getElementById('incident.assigned_to')
-                    //var assignedToVisible = document.getElementById('sys_display.incident.assigned_to');
+                    var assignedTo = document.getElementById('incident.assigned_to')
+                    var assignedToVisible = document.getElementById('sys_display.incident.assigned_to');
                     reqForVisible.value = uName;
                     reqFor.value = userID;
                     reqFor.onchange();
                     reqFor.setAttribute('aria-activedescendant', 'ac_option_' + userID);
-                    //assignedToVisible.value = uName;
-                    //assignedTo.value = userID;
-                    //assignedTo.onchange();
-                    //  reqFor.blur();
-                    console.log('end');
+                    assignedToVisible.value = uName;
+                    assignedTo.value = userID;
+                    assignedTo.onchange();
+                    reqFor.blur();
                 };
             };
 
