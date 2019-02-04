@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.8
+// @version      1.8.1
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -439,20 +439,21 @@ function RUNALL(){
 
         //RFC/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        GM_setValue('rfcSiteMonitoring', false);
-
         if(document.URL == 'http://web-expl.appliarmony.net/OSP/RFC/planning.asp?p=week&t=all&v=eqpt#'){
+
+            GM_setValue('rfcSiteMonitoring', false);
 
             checkDate();
 
             function checkDate(){
                 var siteDate = document.getElementById('startDate').value
+                console.log(siteDate);
                 var nowDate = new Date();
                 siteDate = new Date(siteDate);
-                if(nowDate.getYear == siteDate.getYear && nowDate.getMonth == siteDate.getMonth && nowDate.getDate == siteDate.getDate){
+                if(nowDate.getYear() == siteDate.getYear() && nowDate.getMonth() == siteDate.getMonth() && nowDate.getDate() == siteDate.getDate()){
                     checkIfCalendarPresent();
                 } else {
-                    alert('Change "Start Date" to match current date and refresh the site');
+                    alert('Change "Start Date" to match current date and REFRESH the site');
                 };
             };
 
