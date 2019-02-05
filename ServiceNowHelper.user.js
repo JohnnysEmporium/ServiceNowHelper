@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.8.1
+// @version      1.9
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -15,6 +15,7 @@
 'use strict';
 
 GM_getValue('RFCMESSAGE', false);
+GM_getValue('CONTACTMESSAGE', false);
 
 function RUNALL(){
 
@@ -106,30 +107,41 @@ function RUNALL(){
                 var beforeNodeL = document.getElementsByClassName('vsplit col-sm-6')[3];
                 var beforeNodeU = document.getElementsByClassName('vsplit col-sm-6')[1];
                 var targetNodeT = document.getElementById('element.incident.assignment_group');
+                var targetNodeWorkNotes = document.getElementsByClassName('sn-stream-textarea-container')[2].parentElement;
+
                 var lowerDiv = document.createElement('div');
                 var upperDiv = document.createElement('div');
                 var middleDiv = document.createElement('div');
+                var workNotesDivOb = document.createElement('div');
+                var workNotesDivCim = document.createElement('div');
+
                 var newNodeTran = document.createElement('span');
                 var newNodeRfc = document.createElement('span');
                 var newNodeReoc = document.createElement('span');
                 var newNodeKB = document.createElement('span');
                 var newNodeRFCend = document.createElement('span');
                 var newNodeResolve = document.createElement('span');
-                //        var newNodeRFCPaste = document.createElement('span');
+                var newNodeObContact = document.createElement('span');
+                var newNodeCimContact = document.createElement('span');
+
                 var textTran = document.createTextNode('Transfer');
                 var textRfc = document.createTextNode('RFC check');
                 var textReoc = document.createTextNode('Reoccurrence')
                 var textKB = document.createTextNode('KB');
                 var textRFCend = document.createTextNode('RFC end');
                 var textResolve = document.createTextNode('Resolve');
-                var textRFCPaste = document.createTextNode('RFC Paste');
+                var textObContact = document.createTextNode('OB contacted RG');
+                var textCimContact = document.createTextNode('CIM contacted RG');
+
                 newNodeTran.setAttribute('id', 'TransferringTo');
                 newNodeRfc.setAttribute('id', 'RFC');
                 newNodeReoc.setAttribute('id', 'Reoccurrence')
                 newNodeKB.setAttribute('id', 'KB_open');
                 newNodeRFCend.setAttribute('id', 'RFCend');
                 newNodeResolve.setAttribute('id', 'autoResolve');
-                //        newNodeRFCPaste.setAttribute('id', 'RFCPaste');
+                newNodeObContact.setAttribute('id', 'obContact');
+                newNodeCimContact.setAttribute('id', 'cimContact');
+
                 newNodeTran.style.color = "red";
                 newNodeResolve.style.color = "red"
                 lowerDiv.style.cssText = "margin-left: 312px; margin-bottom: 8px;";
@@ -138,25 +150,33 @@ function RUNALL(){
                 newNodeReoc.style.cssText = "color: red; position: relative; left: 50px;";
                 newNodeKB.style.cssText = "color: red; position: relative; left: 25px;";
                 newNodeRFCend.style.cssText = "color: red; position: relative; left: 25px";
-                newNodeRfc.style.cssText = "position: relative; left:; color: red;";
-                //        newNodeRFCPaste.style.cssText = "position: relative; left: 25px; color: red;";
+                newNodeRfc.style.cssText = "color: red;";
+                newNodeObContact.style.cssText = "color: red;";
+                newNodeCimContact.style.cssText = "color: red";
+
                 newNodeTran.appendChild(textTran);
                 newNodeRfc.appendChild(textRfc);
                 newNodeReoc.appendChild(textReoc);
                 newNodeKB.appendChild(textKB);
                 newNodeRFCend.appendChild(textRFCend);
                 newNodeResolve.appendChild(textResolve);
-                //        newNodeRFCPaste.appendChild(textRFCPaste);
+                newNodeObContact.appendChild(textObContact);
+                newNodeCimContact.appendChild(textCimContact);
+
                 beforeNodeL.insertBefore(lowerDiv, beforeNodeL.childNodes[9]);
                 beforeNodeU.insertBefore(upperDiv, beforeNodeU.childNodes[7]);
                 beforeNodeL.insertBefore(middleDiv, beforeNodeL.childNodes[5]);
+                targetNodeWorkNotes.appendChild(workNotesDivOb);
+                targetNodeWorkNotes.appendChild(workNotesDivCim);
+
                 lowerDiv.appendChild(newNodeTran);
                 upperDiv.appendChild(newNodeResolve);
                 middleDiv.appendChild(newNodeRfc);
-                //        middleDiv.appendChild(newNodeRFCPaste);
                 upperDiv.appendChild(newNodeRFCend);
                 upperDiv.appendChild(newNodeReoc);
                 lowerDiv.appendChild(newNodeKB);
+                workNotesDivOb.appendChild(newNodeObContact);
+                workNotesDivCim.appendChild(newNodeCimContact);
                 EvListener();
             };
 
@@ -168,14 +188,32 @@ function RUNALL(){
                 document.getElementById('KB_open').addEventListener('click', KB, false);
                 document.getElementById('RFCend').addEventListener('click', function(){check(2)}, false);
                 document.getElementById('autoResolve').addEventListener('click', function(){check(1)}, false);
-                //        document.getElementById('RFCPaste').addEventListener('click', RFCPaste, false);
+                document.getElementById('obContact').addEventListener('click', function(){Contact('Operations Bridge')}, false);
+                document.getElementById('cimContact').addEventListener('click', function(){Contact('Critical Incident Manager')}, false);
                 console.log('ev ends');
+            };
+
+            function Contact(group){
+                var RFCMESSAGE = GM_getValue('CONTACTMESSAGE');
+                if(!RFCMESSAGE){
+                    alert('[THIS IS ONE TIME MESSAGE]\n\nTreat "OK" as "YES" and "CANCEL" as "NO"');
+                    GM_setValue('CONTACTMESSAGE', true);
+                };
+                if(confirm('Did the RG picked up?')){
+                    pasteAndPush(group + ' contacted Resolving Group');
+                    if(confirm('Will they investigate?')){
+                        pasteAndPush(', they will investigate.')
+                    } else {
+                        pasteAndPush('.');
+                    };
+                } else {
+                    pasteAndPush(group + ' contacted Resolving Group, there was no response.');
+                };
             };
 
             function transfer(){
                 console.log('transfer start');
                 var fromV = document.getElementById('sys_display.incident.assignment_group').value;
-                var check = document.getElementById('activity-stream-work_notes-textarea').parentElement.parentElement.parentElement.parentElement.className;
                 var text = "Transferring to " +fromV + ".";
                 console.log('before push');
                 pasteAndPush(text);
@@ -188,14 +226,24 @@ function RUNALL(){
                     alert('[THIS IS ONE TIME MESSAGE]\n\nIn order for tihs function to work properly keep RFC site opened in one tab.\nThe best way would be to pin it.\n\nClick the "RFC check" button once again to run this function normally');
                     GM_setValue('RFCMESSAGE', true);
                 } else {
-                GM_setValue('rfcTimeEnd', false);
-                GM_setValue('rfcNumber', false);
-                GM_setValue('isThereRfc', false);
-                var appServices = document.getElementById('sys_display.incident.cmdb_ci').value.toUpperCase();
-                GM_setValue('appServices', appServices);
-                GM_setValue('rfcSiteMonitoring', true);
-                GM_setValue('rfcReturn', false);
-                monitorRfc();
+                    var appServices = document.getElementById('sys_display.incident.cmdb_ci').value.toUpperCase();
+                    var isDateOk = GM_getValue('isDateOk');
+                    GM_setValue('rfcTimeEnd', false);
+                    GM_setValue('rfcNumber', false);
+                    GM_setValue('isThereRfc', false);
+                    GM_setValue('appServices', appServices);
+                    GM_setValue('rfcSiteMonitoring', true);
+                    GM_setValue('rfcReturn', false);
+                    if(!isDateOk){
+                        alert("Date on the RFC site doesn't match current date.");
+                    } else if(isDateOk){
+                        var doesCalendarExist = GM_getValue('doesCalendarExist');
+                        if(!doesCalendarExist){
+                            alert('Wait until the RFC tables are loaded');
+                        } else if(doesCalendarExist){
+                            monitorRfc();
+                        };
+                    };
                 };
             };
 
@@ -452,8 +500,10 @@ function RUNALL(){
                 siteDate = new Date(siteDate);
                 if(nowDate.getYear() == siteDate.getYear() && nowDate.getMonth() == siteDate.getMonth() && nowDate.getDate() == siteDate.getDate()){
                     checkIfCalendarPresent();
+                    GM_setValue('isDateOk', true);
                 } else {
                     alert('Change "Start Date" to match current date and REFRESH the site');
+                    GM_setValue('isDateOk', false);
                 };
             };
 
@@ -461,9 +511,10 @@ function RUNALL(){
                 var idCalendar = document.getElementById('calendar');
                 if (idCalendar === null){
                     console.log('calendar doesnt exists');
+                    GM_setValue('doesCalendarExist', false);
                     setTimeout(checkIfCalendarPresent, 300);
-                    idCalendar = document.getElementById('calendar')
                 } else {
+                    GM_setValue('doesCalendarExist', true);
                     console.log('calendar exists')
                     rfcSiteMonitor();
                 };
