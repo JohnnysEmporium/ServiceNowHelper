@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.9.3
+// @version      1.9.4
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -322,7 +322,9 @@ function RUNALL(){
                 //            if (target == null){
                 //                alert('There is no KB article for this alert');
                 //            } else {
-                window.open('https://arcelormittalprod.service-now.com' + target, '_blank');
+                var windowWithKB = window.open('https://arcelormittalprod.service-now.com' + target, '_blank');
+                GM_setValue('KBURL', target);
+                console.log(GM_getValue('KBURL'));
                 //            };
                 monitor();
             };
@@ -339,12 +341,23 @@ function RUNALL(){
                     };
                 } else {
                     clearTimeout(timeoutMonitor);
+                    monitorFocus();
+                };
+            };
+
+            function monitorFocus(){
+                if (!document.hasFocus()){
+                    console.log('monitorFocus');
+                    var monitorFocusTimeout = setTimeout(monitorFocus, 200);
+                } else if (document.hasFocus()){
+                    clearTimeout(monitorFocusTimeout);
                     RGPaste();
                 };
             };
 
             function RGPaste(){
                 var copy = GM_getValue('copy');
+                console.log('RGPASTE');
                 if(copy){
                     var RGpaste = GM_getValue('targetRG');
                     var text = "Transferring to " + RGpaste + ".";
@@ -477,6 +490,10 @@ function RUNALL(){
                     RG = KBRG.textContent.slice(start+2, end-1);
                     GM_setValue('targetRG', RG);
                     GM_setValue('copy', true);
+                    var leave = confirm('RG copied\nGo to the INC tab and click anywhere to gain tab-focus, to paste the RG\n\nOK - close tab\nCANCEL - stay on tab');
+                    if (leave){
+                        window.close();
+                    };
                 } else {
                     GM_setValue('transferOnly', false);
                 };
