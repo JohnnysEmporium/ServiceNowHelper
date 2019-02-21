@@ -23,6 +23,7 @@ function RUNALL(){
 
         clearTimeout(runallTimeout);
         console.log('runall clear timeout');
+
         var snMain = document.getElementById('dropzone1');
         var snInc = document.getElementById('incident.form_header');
         var bodyCount = document.body.childElementCount;
@@ -485,7 +486,7 @@ function RUNALL(){
 
         //RFC/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        if(document.URL == 'http://web-expl.appliarmony.net/OSP/RFC/planning.asp?p=week&t=all&v=eqpt#'){
+        if(document.URL.slice(0,45) == "http://web-expl.appliarmony.net/OSP/RFC/plann"){
 
             GM_setValue('rfcSiteMonitoring', false);
 
@@ -493,7 +494,6 @@ function RUNALL(){
 
             function checkDate(){
                 var siteDate = document.getElementById('startDate').value
-                console.log(siteDate);
                 var nowDate = new Date();
                 siteDate = new Date(siteDate);
                 console.log('site date: ' + siteDate + '\nyour date: ' + nowDate);
@@ -566,7 +566,7 @@ function RUNALL(){
         };
 
 
-        if((document.URL.slice(0,-5) == "http://web-expl.appliarmony.net/OSP/RFC/valid.asp?ref=") && (GM_getValue('isThereRfc') === true)){
+        if((document.URL.slice(0,45) == "http://web-expl.appliarmony.net/OSP/RFC/valid") && (GM_getValue('isThereRfc') === true)){
             console.log('after if');
             GM_setValue('isThereRfc', false);
             var currentDate = new Date();
