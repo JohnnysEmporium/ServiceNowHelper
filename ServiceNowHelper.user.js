@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.9
+// @version      1.9.1
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -65,7 +65,7 @@ function RUNALL(){
                     rfsh();
                     setTimeout(function(){
                         action();
-                    }, 4000);
+                    }, 5000);
                 },60*1000);
             //INCIDENTS/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (snInc !== null) {
@@ -260,7 +260,6 @@ function RUNALL(){
                             clearTimeout(monitor);
                             break;
                         case 2:
-                            alert('There is no RFC for this server for now');
                             clearTimeout(monitor);
                             break;
                         case 3:
@@ -564,9 +563,8 @@ function RUNALL(){
             };
         };
 
-        var isThere = GM_getValue('isThereRfc');
 
-        if((document.URL.slice(0,-5) == "http://web-expl.appliarmony.net/OSP/RFC/valid.asp?ref=") && (isThere = true)){
+        if((document.URL.slice(0,-5) == "http://web-expl.appliarmony.net/OSP/RFC/valid.asp?ref=") && (GM_getValue('isThereRfc') === true)){
             console.log('after if');
             GM_setValue('isThereRfc', false);
             var currentDate = new Date();
@@ -587,6 +585,7 @@ function RUNALL(){
                 };
             };
 
+            //Searches for Equipement(s) labels, finds next sibling (server names) and forwards data
             function getRfc(){
                 console.log('get');
                 var serverName = GM_getValue('appServices');
@@ -608,6 +607,7 @@ function RUNALL(){
                 valuesOtherThanMinusOne(arr);
             };
 
+            //Returns an array with position of server matches
             function valuesOtherThanMinusOne(arr){
                 console.log('values');
                 var i = 0
@@ -709,6 +709,7 @@ function RUNALL(){
                     GM_setValue('rfcReturn', 2);
                 };
                 ifFound = false;
+                alert('There is no RFC for this server for now');
                 window.close();
             };
 
