@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.9.4
+// @version      1.9.5
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -323,8 +323,6 @@ function RUNALL(){
                 //                alert('There is no KB article for this alert');
                 //            } else {
                 var windowWithKB = window.open('https://arcelormittalprod.service-now.com' + target, '_blank');
-                GM_setValue('KBURL', target);
-                console.log(GM_getValue('KBURL'));
                 //            };
                 monitor();
             };
