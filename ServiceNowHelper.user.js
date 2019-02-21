@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.9.1
+// @version      1.9.2
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -476,7 +476,6 @@ function RUNALL(){
                     RG = KBRG.textContent.slice(start+2, end-1);
                     GM_setValue('targetRG', RG);
                     GM_setValue('copy', true);
-                    window.close();
                 } else {
                     GM_setValue('transferOnly', false);
                 };
@@ -497,12 +496,15 @@ function RUNALL(){
                 console.log(siteDate);
                 var nowDate = new Date();
                 siteDate = new Date(siteDate);
+                console.log('site date: ' + siteDate + '\nyour date: ' + nowDate);
                 if(nowDate.getYear() == siteDate.getYear() && nowDate.getMonth() == siteDate.getMonth() && nowDate.getDate() == siteDate.getDate()){
                     checkIfCalendarPresent();
                     GM_setValue('isDateOk', true);
+                    console.log(GM_getValue('isDateOk'));
                 } else {
                     alert('Change "Start Date" to match current date and REFRESH the site');
                     GM_setValue('isDateOk', false);
+                    console.log(GM_getValue('isDateOk'));
                 };
             };
 
