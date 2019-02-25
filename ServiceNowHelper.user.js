@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.9.5
+// @version      1.9.6
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -30,44 +30,44 @@ function RUNALL(){
 
         //SNOW MAIN/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         if (snMain !== null){
-                var ad = new Audio('http://newt.phys.unsw.edu.au/music/bellplates/sounds/equilateral_plate+second_partial.mp3');
-                console.log('SNS');
-                //ANCHOR TO THE ELEMENT THAT NEEDS TO BE MONITORED FOR PROPER ALERT HANDLING
-                function anchor(){
-                    const wb = document.getElementsByClassName("widget_body")[1];
-                    var rects = wb.getElementsByTagName("rect");
-                    var rectslen = rects.length;
-                    console.log('how much rects ' + rectslen);
-                    return rectslen
-                };
+            var ad = new Audio('http://newt.phys.unsw.edu.au/music/bellplates/sounds/equilateral_plate+second_partial.mp3');
+            console.log('SNS');
+            //ANCHOR TO THE ELEMENT THAT NEEDS TO BE MONITORED FOR PROPER ALERT HANDLING
+            function anchor(){
+                const wb = document.getElementsByClassName("widget_body")[1];
+                var rects = wb.getElementsByTagName("rect");
+                var rectslen = rects.length;
+                console.log('how much rects ' + rectslen);
+                return rectslen
+            };
 
-                //REFRESHES ALL WINDOWS
-                function rfsh(){
-                    const elToClick = document.querySelectorAll('.icon-refresh')
-                    var i = 1;
-                    setTimeout(function(){
-                        for (i = 1; i < 6; i++){
-                            elToClick[i].click();
-                        };
-                    },300);
-                };
-
-                //PLAYS SOUND IF ALERT IS UNACKNOWLEDGED
-                function action(){
-                    if (anchor() > 5){
-                        //            setInterval(function(){
-                        ad.play();
-                        //            }, 500);
+            //REFRESHES ALL WINDOWS
+            function rfsh(){
+                const elToClick = document.querySelectorAll('.icon-refresh')
+                var i = 1;
+                setTimeout(function(){
+                    for (i = 1; i < 6; i++){
+                        elToClick[i].click();
                     };
-                };
+                },300);
+            };
 
-                //EXECUTES ALL OF THE ABOVE
-                setInterval(function(){
-                    rfsh();
-                    setTimeout(function(){
-                        action();
-                    }, 5000);
-                },60*1000);
+            //PLAYS SOUND IF ALERT IS UNACKNOWLEDGED
+            function action(){
+                if (anchor() > 5){
+                    //            setInterval(function(){
+                    ad.play();
+                    //            }, 500);
+                };
+            };
+
+            //EXECUTES ALL OF THE ABOVE
+            setInterval(function(){
+                rfsh();
+                setTimeout(function(){
+                    action();
+                }, 5000);
+            },60*1000);
             //INCIDENTS/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (snInc !== null) {
             console.log('AR and AT');
@@ -82,6 +82,9 @@ function RUNALL(){
             GM_setValue('transferOnly', true);
 
             function userAssign(){
+                var tabs2 = document.getElementById('tabs2_section');
+                var dest = tabs2.childNodes[0].childNodes[0];
+                dest.click();
                 var reqForVisible = document.getElementById('sys_display.incident.u_requested_for');
                 var assignmentGroup = document.getElementById('sys_display.incident.assignment_group');
                 if(reqForVisible.value == "" && assignmentGroup.value == "BD North - Infrastructure - Operations Bridge - HCL"){
@@ -280,6 +283,7 @@ function RUNALL(){
                     var timeoutPaste;
                     timeoutPaste = setTimeout(RFCPaste, 1000);
                 } else {
+                    console.log('CLEARING VALUES');
                     clearTimeout(timeoutPaste);
                     GM_setValue('rfcTimeEnd', false);
                     GM_setValue('rfcNumber', false);
@@ -482,12 +486,18 @@ function RUNALL(){
             function RGcopy(){
                 var KBRG = document.getElementById('article').getElementsByTagName('p')[2];
                 var start, end, RG;
-                if(KBRG.textContent.slice(0,24) == "Transfer the incident to" && KBRG.childElementCount == 1){
+                if(KBRG.textContent.slice(0,8) == "Transfer" && KBRG.childElementCount == 1){
                     start = KBRG.textContent.search('«');
                     end = KBRG.textContent.search('»');
                     RG = KBRG.textContent.slice(start+2, end-1);
-                    GM_setValue('targetRG', RG);
-                    GM_setValue('copy', true);
+                    if(RG == 'BD North – Infrastructure – Midrange SAP BC'){
+                        RG = 'BD North - Infrastructure - Midrange SAP BC';
+                        GM_setValue('targetRG', RG);
+                        GM_setValue('copy', true)
+                    } else {
+                        GM_setValue('targetRG', RG);
+                        GM_setValue('copy', true);
+                    };
                     var leave = confirm('RG copied\nGo to the INC tab and click anywhere to gain tab-focus, to paste the RG\n\nOK - close tab\nCANCEL - stay on tab');
                     if (leave){
                         window.close();
@@ -621,6 +631,7 @@ function RUNALL(){
                     arr.push(labelsNew[i].nextSibling.textContent.search(serverName));
                     i++;
                 };
+                console.log(arr);
                 valuesOtherThanMinusOne(arr);
             };
 
@@ -673,29 +684,32 @@ function RUNALL(){
 
             function getHours(arr, length){
                 var startDate = [];
+                var temp = [];
                 var endDate = [];
-                var someDate = new Date();
                 var i = 0;
                 var j = 0;
                 while(i < length){
                     startDate.push(new Date(arr[i][0]));
+                    temp.push(new Date(startDate));
                     if(arr[i][1].length > 7){
                         endDate.push(new Date(arr[i][1]));
                     } else {
                         if(arr[i][1].length == 4){
-                            endDate.push(new Date((someDate).setHours(arr[i][1].slice(0,1),(arr[i][1].slice(-2)))));
+                            endDate.push(new Date((temp[i]).setHours(arr[i][1].slice(0,1),(arr[i][1].slice(-2)))));
                         } else {
-                            endDate.push(new Date((someDate).setHours(arr[i][1].slice(0,2),(arr[i][1].slice(-2)))));
+                            endDate.push(new Date((temp[i]).setHours(arr[i][1].slice(0,2),(arr[i][1].slice(-2)))));
                         };
                     };
                     i++
                 };
+                console.log(startDate);
                 console.log(endDate);
                 checkTime(startDate, endDate);
             };
 
             function checkTime(sD, eD){
                 console.log('check');
+                console.log(sD);
                 console.log(eD);
                 var i = 0;
                 var cD = currentDate;
