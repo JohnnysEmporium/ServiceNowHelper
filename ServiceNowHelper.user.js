@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      2.1
+// @version      2.1.1
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -310,15 +310,22 @@ function RUNALL(){
                         KB();
                     };
                 }, false);
-                //ALT+R
-                document.addEventListener('keydown', function(e){
-                    if (e.keyCode == 82 && !e.shiftKey && !e.ctrlKey && e.altKey && !e.metaKey) {
-                        check(1);
-                    };
-                }, false);
                 //ALT+A
                 document.addEventListener('keydown', function(e){
                     if (e.keyCode == 65 && !e.shiftKey && !e.ctrlKey && e.altKey && !e.metaKey) {
+                        check(1);
+                    };
+                }, false);
+                //ALT+D
+                document.addEventListener('keydown', function(e){
+                    if (e.keyCode == 68 && !e.shiftKey && !e.ctrlKey && e.altKey && !e.metaKey) {
+                        check(2);
+                    };
+                }, false);
+                console.log('ev ends');
+                //ALT+C
+                document.addEventListener('keydown', function(e){
+                    if (e.keyCode == 67 && !e.shiftKey && !e.ctrlKey && e.altKey && !e.metaKey) {
                         incSave();
                     };
                 }, false);
