@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      2.0
+// @version      2.1
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -98,6 +98,7 @@ function RUNALL(){
             if(!ifFound){
                 GM_setValue('rfcReturn', 2);
                 if(rfcSiteClose){
+                    alert('There is no RFC for this server right now')
                     window.close();
                 };
             };
@@ -158,7 +159,7 @@ function RUNALL(){
                 rfsh();
                 setTimeout(function(){
                     action();
-                }, 5000);
+                }, 6000);
             },60*1000);
             //INCIDENTS/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (snInc !== null) {
@@ -204,12 +205,14 @@ function RUNALL(){
                 var beforeNodeU = document.getElementsByClassName('vsplit col-sm-6')[1];
                 var targetNodeT = document.getElementById('element.incident.assignment_group');
                 var targetNodeWorkNotes = document.getElementsByClassName('sn-stream-textarea-container')[2].parentElement;
+                var targetInfo = document.getElementById('incident.form_scroll');
 
                 var lowerDiv = document.createElement('div');
                 var upperDiv = document.createElement('div');
                 var middleDiv = document.createElement('div');
                 var workNotesDivOb = document.createElement('div');
                 var workNotesDivCim = document.createElement('div');
+                var infoDiv = document.createElement('div');
 
                 var newNodeTran = document.createElement('span');
                 var newNodeRfc = document.createElement('span');
@@ -219,6 +222,7 @@ function RUNALL(){
                 var newNodeResolve = document.createElement('span');
                 var newNodeObContact = document.createElement('span');
                 var newNodeCimContact = document.createElement('span');
+                var newNodeInfo = document.createElement('span');
 
                 var textTran = document.createTextNode('Transfer');
                 var textRfc = document.createTextNode('RFC check');
@@ -228,6 +232,7 @@ function RUNALL(){
                 var textResolve = document.createTextNode('Resolve');
                 var textObContact = document.createTextNode('OB contacted RG');
                 var textCimContact = document.createTextNode('CIM contacted RG');
+                var textInfo = document.createTextNode('Shortcut Help');
 
                 newNodeTran.setAttribute('id', 'TransferringTo');
                 newNodeRfc.setAttribute('id', 'RFC');
@@ -237,6 +242,7 @@ function RUNALL(){
                 newNodeResolve.setAttribute('id', 'autoResolve');
                 newNodeObContact.setAttribute('id', 'obContact');
                 newNodeCimContact.setAttribute('id', 'cimContact');
+                newNodeInfo.setAttribute('id', 'shortcutInfo');
 
                 newNodeTran.style.color = "red";
                 newNodeResolve.style.color = "red"
@@ -249,6 +255,7 @@ function RUNALL(){
                 newNodeRfc.style.cssText = "color: red;";
                 newNodeObContact.style.cssText = "color: red;";
                 newNodeCimContact.style.cssText = "color: red";
+                newNodeInfo.style.cssText = "color: red";
 
                 newNodeTran.appendChild(textTran);
                 newNodeRfc.appendChild(textRfc);
@@ -258,12 +265,14 @@ function RUNALL(){
                 newNodeResolve.appendChild(textResolve);
                 newNodeObContact.appendChild(textObContact);
                 newNodeCimContact.appendChild(textCimContact);
+                newNodeInfo.appendChild(textInfo)
 
                 beforeNodeL.insertBefore(lowerDiv, beforeNodeL.childNodes[9]);
                 beforeNodeU.insertBefore(upperDiv, beforeNodeU.childNodes[7]);
                 beforeNodeL.insertBefore(middleDiv, beforeNodeL.childNodes[5]);
                 targetNodeWorkNotes.appendChild(workNotesDivOb);
                 targetNodeWorkNotes.appendChild(workNotesDivCim);
+                targetInfo.insertBefore(infoDiv, targetInfo.childNodes[0]);
 
                 lowerDiv.appendChild(newNodeTran);
                 upperDiv.appendChild(newNodeResolve);
@@ -273,6 +282,7 @@ function RUNALL(){
                 lowerDiv.appendChild(newNodeKB);
                 workNotesDivOb.appendChild(newNodeObContact);
                 workNotesDivCim.appendChild(newNodeCimContact);
+                infoDiv.appendChild(newNodeInfo);
                 EvListener();
             };
 
@@ -286,7 +296,41 @@ function RUNALL(){
                 document.getElementById('autoResolve').addEventListener('click', function(){check(1)}, false);
                 document.getElementById('obContact').addEventListener('click', function(){Contact('Operations Bridge')}, false);
                 document.getElementById('cimContact').addEventListener('click', function(){Contact('Critical Incident Manager')}, false);
+                document.getElementById('shortcutInfo').addEventListener('click', shortcutInfo, false);
+                //keyboard shortcuts
+                //ALT+Q
+                document.addEventListener('keydown', function(e){
+                    if (e.keyCode == 81 && !e.shiftKey && !e.ctrlKey && e.altKey && !e.metaKey) {
+                        RFC();
+                    };
+                }, false);
+                //ALT+W
+                document.addEventListener('keydown', function(e){
+                    if (e.keyCode == 87 && !e.shiftKey && !e.ctrlKey && e.altKey && !e.metaKey) {
+                        KB();
+                    };
+                }, false);
+                //ALT+R
+                document.addEventListener('keydown', function(e){
+                    if (e.keyCode == 82 && !e.shiftKey && !e.ctrlKey && e.altKey && !e.metaKey) {
+                        check(1);
+                    };
+                }, false);
+                //ALT+A
+                document.addEventListener('keydown', function(e){
+                    if (e.keyCode == 65 && !e.shiftKey && !e.ctrlKey && e.altKey && !e.metaKey) {
+                        incSave();
+                    };
+                }, false);
                 console.log('ev ends');
+            };
+
+            function shortcutInfo(){
+                alert('Press the following keys to run specified function:\n\nALT+Q - RFC check\nALT+W - KB\nALT+R - Resolve\nALT+A - Save the incident (top right button)');
+            };
+
+            function incSave(){
+                document.getElementById('incident.form_header').getElementById('sysverb_update_and_stay').click();
             };
 
             function Contact(group){
@@ -628,6 +672,10 @@ function RUNALL(){
                     RG = KBRG.textContent.slice(start+2, end-1);
                     if(RG == 'BD North – Infrastructure – Midrange SAP BC'){
                         RG = 'BD North - Infrastructure - Midrange SAP BC';
+                        GM_setValue('targetRG', RG);
+                        GM_setValue('copy', true)
+                    } else if (RG == 'BD North - Applications Industrielles - AMAL - Dunkerque – GTS'){
+                        RG = 'BD North - Applications Industrielles - AMAL - Dunkerque - GTS';
                         GM_setValue('targetRG', RG);
                         GM_setValue('copy', true)
                     } else {
