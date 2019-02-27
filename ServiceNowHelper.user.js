@@ -330,7 +330,8 @@ function RUNALL(){
             };
 
             function incSave(){
-                document.getElementById('incident.form_header').getElementById('sysverb_update_and_stay').click();
+                console.log('incSave');
+                document.getElementById('incident.form_header').querySelector('sysverb_update_and_stay').click();
             };
 
             function Contact(group){
