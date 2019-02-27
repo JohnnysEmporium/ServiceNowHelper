@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.9.6
+// @version      2.0
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -27,6 +27,98 @@ function RUNALL(){
         var snMain = document.getElementById('dropzone1');
         var snInc = document.getElementById('incident.form_header');
         var bodyCount = document.body.childElementCount;
+
+        function arraySplit(arr){
+                console.log(arr);
+                var i = 0;
+                var arrSplited = []
+                while(i < arr.length){
+                    arrSplited.push(arr[i].split(' to '));
+                    i++;
+                };
+                getHours(arrSplited, arr.length);
+            };
+
+        function getHours(arr, length){
+            var startDate = [];
+            var temp = [];
+            var endDate = [];
+            var i = 0;
+            var j = 0;
+            while(i < length){
+                startDate.push(new Date(arr[i][0]));
+                temp.push(new Date(startDate));
+                if(arr[i][1].length > 7){
+                    endDate.push(new Date(arr[i][1]));
+                } else {
+                    if(arr[i][1].length == 4){
+                        endDate.push(new Date((temp[i]).setHours(arr[i][1].slice(0,1),(arr[i][1].slice(-2)))));
+                    } else {
+                        endDate.push(new Date((temp[i]).setHours(arr[i][1].slice(0,2),(arr[i][1].slice(-2)))));
+                    };
+                };
+                i++
+            };
+            console.log(startDate);
+            console.log(endDate);
+            checkTime(startDate, endDate);
+        };
+
+        function checkTime(sD, eD){
+            console.log('check');
+            console.log(sD);
+            console.log(eD);
+            var rfcSiteClose = GM_getValue('rfcSiteClose');
+            var i = 0;
+            var cD = new Date();
+            console.log(cD);
+            var threshold = 30*60*1000;
+            var ifFound = 0;
+            while(i < sD.length){
+                //     if(eD && eD.constructor === Array && eD.length === 0){
+
+                //   } else {
+                if(cD > sD[i] && cD < eD[i]){
+                    alert('RFC found, the data has been pasted in Work Notes field');
+                    console.log('RFC found, value to paste stored');
+                    storeValue(eD[i]);
+                    ifFound = true;
+                    GM_setValue('rfcReturn', 3)
+                    break;
+                } else if(cD > (sD[i].getTime() - threshold) && cD < (eD[i].getTime() + threshold)){
+                    alert('RFC is going to start or has already ended (time range is 30 minutes)\nDespite that, value has been stored and pasted into the Work Notes field');
+                    storeValue(eD[i]);
+                    ifFound = true;
+                    GM_setValue('rfcReturn', 3);
+                    break;
+                };
+                i++;
+                //      };
+            };
+            if(!ifFound){
+                GM_setValue('rfcReturn', 2);
+                if(rfcSiteClose){
+                    window.close();
+                };
+            };
+        };
+
+        function storeValue(eT){
+            var endTime = eT;
+            var zeroOrNot = eT.getMinutes();
+            var rfcSiteClose = GM_getValue('rfcSiteClose');
+            var endTimeToPaste;
+            if(String(eT.getMinutes()).length == 1){
+                endTimeToPaste = eT.getFullYear() + '-' + Number(eT.getMonth() + 1) + '-' + eT.getDate() + ' at ' + eT.getHours() + ':' + eT.getMinutes() + '0';
+            } else {
+                endTimeToPaste = eT.getFullYear() + '-' + Number(eT.getMonth() + 1) + '-' + eT.getDate() + ' at ' + eT.getHours() + ':' + eT.getMinutes();
+            };
+            console.log(endTimeToPaste)
+            GM_setValue('rfcTimeEnd', endTimeToPaste);
+            if(rfcSiteClose){
+                window.close();
+            };
+        };
 
         //SNOW MAIN/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         if (snMain !== null){
@@ -211,7 +303,7 @@ function RUNALL(){
                         pasteAndPush('.');
                     };
                 } else {
-                    pasteAndPush(group + ' contacted Resolving Group, there was no response.');
+                    pasteAndPush(group + ' tried to contact the Resolving Group, there was no response.');
                 };
             };
 
@@ -232,27 +324,68 @@ function RUNALL(){
                 } else {
                     var appServices = document.getElementById('sys_display.incident.cmdb_ci').value.toUpperCase();
                     var isDateOk = GM_getValue('isDateOk');
+                    var labelsQuick = GM_getValue('labelsQuick');
+                    var labelsFind = [];
+                    var labelsArrPos = [];
+                    var date = [];
+                    var splittedArr = [];
                     GM_setValue('rfcTimeEnd', false);
                     GM_setValue('rfcNumber', false);
                     GM_setValue('isThereRfc', false);
                     GM_setValue('appServices', appServices);
-                    GM_setValue('rfcSiteMonitoring', true);
                     GM_setValue('rfcReturn', false);
-                    if(!isDateOk){
-                        alert("Date on the RFC site doesn't match current date.");
-                    } else if(isDateOk){
-                        var doesCalendarExist = GM_getValue('doesCalendarExist');
-                        if(!doesCalendarExist){
-                            alert('Wait until the RFC tables are loaded');
-                        } else if(doesCalendarExist){
+                    console.log(labelsQuick);
+                    if(labelsQuick && typeof labelsQuick !== 'undefined'){
+                        for(var i = 0; i < labelsQuick.length; i++){
+                            labelsFind.push(labelsQuick[i][0][0].search(appServices));
+                        };
+                        labelsArrPos = valuesOtherThanMinusOne(labelsFind);
+                        if(labelsArrPos.length !== 0){
+                            GM_setValue('rfcSiteClose', false);
+                            for(var j = 0; j < labelsArrPos.length; j++){
+                                date.push(labelsQuick[labelsArrPos][1][0]);
+                            };
+                            arraySplit(date);
                             monitorRfc();
+                        } else {
+                            GM_setValue('labelsQuick', false);
+                            GM_setValue('rfcNumberQuick', false);
+                            RFC();
+                        };
+                    } else {
+                        console.log('else');
+                        if(!isDateOk){
+                            alert("Date on the RFC site doesn't match current date.");
+                        } else if(isDateOk){
+                            var doesCalendarExist = GM_getValue('doesCalendarExist');
+                            if(!doesCalendarExist){
+                                alert('Wait until the RFC tables are loaded');
+                            } else if(doesCalendarExist){
+                                GM_setValue('rfcSiteClose', true);
+                                GM_setValue('rfcSiteMonitoring', true);
+                                monitorRfc();
+                            };
                         };
                     };
                 };
             };
 
+            function valuesOtherThanMinusOne(arr){
+                console.log('values');
+                var i = 0
+                var outputArr = [];
+                while(i !== arr.length){
+                    if(arr[i] !== -1){
+                        outputArr.push(i);
+                    };
+                    i++
+                };
+                return outputArr;
+            };
+
             function monitorRfc(){
                 var rfcReturn = GM_getValue('rfcReturn');
+                var rfcSiteClose = GM_getValue('rfcSiteClose');
                 console.log(rfcReturn);
                 if(!rfcReturn){
                     console.log('monitoring');
@@ -264,6 +397,9 @@ function RUNALL(){
                             clearTimeout(monitor);
                             break;
                         case 2:
+                            if(!rfcSiteClose){
+                                alert('There is no RFC for this server right now');
+                            };
                             clearTimeout(monitor);
                             break;
                         case 3:
@@ -278,8 +414,8 @@ function RUNALL(){
                 console.log('repeating');
                 var rfcTimeEnd = GM_getValue('rfcTimeEnd');
                 var rfcNumber = GM_getValue('rfcNumber');
-                console.log(rfcTimeEnd, rfcNumber);
-                if(!(rfcTimeEnd && rfcNumber)){
+                var rfcNumberQuick = GM_getValue('rfcNumberQuick');
+                if(!(rfcTimeEnd && (rfcNumber || rfcNumberQuick))){
                     var timeoutPaste;
                     timeoutPaste = setTimeout(RFCPaste, 1000);
                 } else {
@@ -514,6 +650,8 @@ function RUNALL(){
         if(document.URL.slice(0,45) == "http://web-expl.appliarmony.net/OSP/RFC/plann"){
 
             GM_setValue('rfcSiteMonitoring', false);
+            GM_setValue('labelsQuick', false);
+            GM_setValue('rfcNumberQuick', false);
 
             checkDate();
 
@@ -616,21 +754,33 @@ function RUNALL(){
             function getRfc(){
                 console.log('get');
                 var serverName = GM_getValue('appServices');
+                var rfcNumber = document.URL.slice(-5)
+                GM_setValue('rfcNumber', rfcNumber);
                 var iwoList = document.getElementById('iwoList');
                 var labels = iwoList.getElementsByTagName('label');
                 var labelsLength = labels.length;
-                var labelsNew = []
+                var labelsNew = [];
+                var labelsQuick1 = [];
+                var labelsQuick2 = [];
+                var labelsQuick = [];
+                var k = 0;
                 var j = 0;
                 var i = 0;
                 var oldArr = [];
                 var arr = [];
                 for(j = 3; j < labelsLength; j = j + 8){
                     labelsNew.push(labels[j]);
+                    labelsQuick1.push(labelsNew[k].nextSibling.textContent);
+                    labelsQuick2.push(labelsNew[k].nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.innerText);
+                    labelsQuick.push([[labelsQuick1[k]], [labelsQuick2[k]]]);
+                    k++;
                 };
                 while(i < labelsNew.length){
                     arr.push(labelsNew[i].nextSibling.textContent.search(serverName));
                     i++;
                 };
+                GM_setValue("labelsQuick", labelsQuick);
+                GM_setValue("rfcNumberQuick", rfcNumber);
                 console.log(arr);
                 valuesOtherThanMinusOne(arr);
             };
@@ -669,95 +819,6 @@ function RUNALL(){
                     counter++;
                 };
                 arraySplit(arr);
-            };
-
-            function arraySplit(arr){
-                console.log('arr');
-                var i = 0;
-                var arrSplited = []
-                while(i < arr.length){
-                    arrSplited.push(arr[i].split(' to '));
-                    i++;
-                };
-                getHours(arrSplited, arr.length);
-            };
-
-            function getHours(arr, length){
-                var startDate = [];
-                var temp = [];
-                var endDate = [];
-                var i = 0;
-                var j = 0;
-                while(i < length){
-                    startDate.push(new Date(arr[i][0]));
-                    temp.push(new Date(startDate));
-                    if(arr[i][1].length > 7){
-                        endDate.push(new Date(arr[i][1]));
-                    } else {
-                        if(arr[i][1].length == 4){
-                            endDate.push(new Date((temp[i]).setHours(arr[i][1].slice(0,1),(arr[i][1].slice(-2)))));
-                        } else {
-                            endDate.push(new Date((temp[i]).setHours(arr[i][1].slice(0,2),(arr[i][1].slice(-2)))));
-                        };
-                    };
-                    i++
-                };
-                console.log(startDate);
-                console.log(endDate);
-                checkTime(startDate, endDate);
-            };
-
-            function checkTime(sD, eD){
-                console.log('check');
-                console.log(sD);
-                console.log(eD);
-                var i = 0;
-                var cD = currentDate;
-                var threshold = 30*60*1000;
-                var ifFound;
-                while(i < sD.length){
-                    //     if(eD && eD.constructor === Array && eD.length === 0){
-
-                    //   } else {
-                    if(cD > sD[i] && cD < eD[i]){
-                        alert('RFC found, the data has been pasted in Work Notes field');
-                        console.log('RFC found, value to paste stored');
-                        storeValue(eD[i]);
-                        ifFound = true;
-                        GM_setValue('rfcReturn', 3)
-                        break;
-                    } else if(cD > (sD[i].getTime() - threshold) && cD < (eD[i].getTime() + threshold)){
-                        alert('RFC is going to start or has already ended (time range is 30 minutes)\nDespite that, value has been stored and pasted into the Work Notes field');
-                        storeValue(eD[i]);
-                        ifFound = true;
-                        GM_setValue('rfcReturn', 3);
-                        break;
-                    };
-                    i++;
-                    //      };
-                };
-                if(!ifFound){
-                    GM_setValue('rfcReturn', 2);
-                };
-                ifFound = false;
-                alert('There is no RFC for this server for now');
-                window.close();
-            };
-
-            function storeValue(eT){
-                var endTime = eT;
-                var zeroOrNot = eT.getMinutes();
-                var endTimeToPaste;
-                if(String(eT.getMinutes()).length == 1){
-                    endTimeToPaste = eT.getFullYear() + '-' + Number(eT.getMonth() + 1) + '-' + eT.getDate() + ' at ' + eT.getHours() + ':' + eT.getMinutes() + '0';
-                } else {
-                    endTimeToPaste = eT.getFullYear() + '-' + Number(eT.getMonth() + 1) + '-' + eT.getDate() + ' at ' + eT.getHours() + ':' + eT.getMinutes();
-                };
-                var rfcNumber = document.URL.slice(-5);
-                console.log(endTimeToPaste)
-                GM_setValue('rfcNumber', rfcNumber);
-                GM_setValue('rfcTimeEnd', endTimeToPaste);
-                window.close();
             };
         };
     } else {
