@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      2.1.1
+// @version      2.1.2
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -333,7 +333,8 @@ function RUNALL(){
             };
 
             function shortcutInfo(){
-                alert('Press the following keys to run specified function:\n\nALT+Q - RFC check\nALT+W - KB\nALT+A - Resolve\nALT+D - RFC end\nALT+C - Save the incident (top right button)');
+                alert('Press the following keys to run specified function:\n\nALT+Q - RFC check\nALT+W - KB\n\nALT+A - Resolve\nALT+D - RFC end\nALT+C - Save the incident (top right button)');
+
             };
 
             function incSave(){
