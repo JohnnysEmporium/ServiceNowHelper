@@ -333,7 +333,7 @@ function RUNALL(){
             };
 
             function shortcutInfo(){
-                alert('Press the following keys to run specified function:\n\nALT+Q - RFC check\nALT+W - KB\nALT+A - Resolve\nALT+D - RFC end\mALT+C - Save the incident (top right button)');
+                alert('Press the following keys to run specified function:\n\nALT+Q - RFC check\nALT+W - KB\nALT+A - Resolve\nALT+D - RFC end\nALT+C - Save the incident (top right button)');
             };
 
             function incSave(){
