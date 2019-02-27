@@ -331,7 +331,7 @@ function RUNALL(){
 
             function incSave(){
                 console.log('incSave');
-                document.getElementById('incident.form_header').querySelector('sysverb_update_and_stay').click();
+                document.getElementById('incident.form_header').querySelector('#sysverb_update_and_stay').click();
             };
 
             function Contact(group){
