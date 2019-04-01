@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      2.1.2
+// @version      2.1.3
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -47,7 +47,7 @@ function RUNALL(){
             var j = 0;
             while(i < length){
                 startDate.push(new Date(arr[i][0]));
-                temp.push(new Date(startDate));
+                temp.push(new Date(startDate[i]));
                 if(arr[i][1].length > 7){
                     endDate.push(new Date(arr[i][1]));
                 } else {
@@ -59,19 +59,13 @@ function RUNALL(){
                 };
                 i++
             };
-            console.log(startDate);
-            console.log(endDate);
             checkTime(startDate, endDate);
         };
 
         function checkTime(sD, eD){
-            console.log('check');
-            console.log(sD);
-            console.log(eD);
             var rfcSiteClose = GM_getValue('rfcSiteClose');
             var i = 0;
             var cD = new Date();
-            console.log(cD);
             var threshold = 30*60*1000;
             var ifFound = 0;
             while(i < sD.length){
@@ -99,7 +93,7 @@ function RUNALL(){
                 GM_setValue('rfcReturn', 2);
                 if(rfcSiteClose){
                     alert('There is no RFC for this server right now')
-                    window.close();
+                   window.close();
                 };
             };
         };
@@ -117,7 +111,7 @@ function RUNALL(){
             console.log(endTimeToPaste)
             GM_setValue('rfcTimeEnd', endTimeToPaste);
             if(rfcSiteClose){
-                window.close();
+               window.close();
             };
         };
 
@@ -159,7 +153,7 @@ function RUNALL(){
                 rfsh();
                 setTimeout(function(){
                     action();
-                }, 6000);
+                }, 10000);
             },60*1000);
             //INCIDENTS/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         } else if (snInc !== null) {
@@ -333,8 +327,7 @@ function RUNALL(){
             };
 
             function shortcutInfo(){
-                alert('Press the following keys to run specified function:\n\nALT+Q - RFC check\nALT+W - KB\n\nALT+A - Resolve\nALT+D - RFC end\nALT+C - Save the incident (top right button)');
-
+                alert('Press the following keys to run specified function:\n\nALT+Q - RFC check\nALT+W - KB\n\nALT+A - Resolve\nALT+D - RFC end\n\nALT+C - Save the incident (top right button)');
             };
 
             function incSave(){
