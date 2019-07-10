@@ -117,7 +117,7 @@ function RUNALL(){
             console.log('SNS');
             //ANCHOR TO THE ELEMENT THAT NEEDS TO BE MONITORED FOR PROPER ALERT HANDLING
             function anchor(){
-                const wb = document.getElementsByClassName("widget_body")[1];
+                const wb = document.getElementsByClassName("widget_body")[2];
                 var rects = wb.getElementsByTagName("rect");
                 var rectslen = rects.length;
                 console.log('how much rects ' + rectslen);
