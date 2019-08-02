@@ -1,19 +1,16 @@
 // ==UserScript==
-// @name         ServiceNow Helper - with start timer
-// @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      1.0
-// @description  Adds a few features to the Service Now console.
+// @name         SNow Helper 1H delay - with start timer
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
 // @match        http://web-expl.appliarmony.net/OSP/RFC/*
-// @downloadURL  https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @updateURL    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
 // @grant        GM_setValue
 // @grant        GM_getValue
 // ==/UserScript==
 
 'use strict';
 
+GM_getValue('RFCMESSAGE', false);
+GM_getValue('CONTACTMESSAGE', false);
 GM_getValue('RFCMESSAGE', false);
 GM_getValue('CONTACTMESSAGE', false);
 var ETA = new Date();
@@ -25,12 +22,14 @@ var startTime_H = 6
 function RUNALL(){
 
     if(document.readyState === 'complete'){
+
         if(ETA_H >= startTime_H && ETA_M >= 0){
             console.log('STARTED');
 
             clearTimeout(runallTimeout);
             console.log('runall clear timeout');
 
+            GM_setValue('doNotRefresh', false);
             var snMain = document.getElementById('dropzone1');
             var snInc = document.getElementById('incident.form_header');
             var bodyCount = document.body.childElementCount;
@@ -128,7 +127,7 @@ function RUNALL(){
                 console.log('SNS');
                 //ANCHOR TO THE ELEMENT THAT NEEDS TO BE MONITORED FOR PROPER ALERT HANDLING
                 function anchor(){
-                    const wb = document.getElementsByClassName("widget_body")[1];
+                    const wb = document.getElementsByClassName("widget_body")[2];
                     var rects = wb.getElementsByTagName("rect");
                     var rectslen = rects.length;
                     console.log('how much rects ' + rectslen);
@@ -149,19 +148,27 @@ function RUNALL(){
                 //PLAYS SOUND IF ALERT IS UNACKNOWLEDGED
                 function action(){
                     if (anchor() > 5){
-                        //            setInterval(function(){
-                        ad.play();
-                        //            }, 500);
+                        GM_setValue('doNotRefresh', true);
+                        console.log('pausing refreshing');
+                        setTimeout(function(){
+                            setInterval(function(){
+                                ad.play();
+                            }, 500);
+                        }, 3600000);
                     };
                 };
 
                 //EXECUTES ALL OF THE ABOVE
                 setInterval(function(){
-                    rfsh();
-                    setTimeout(function(){
-                        action();
-                    }, 10000);
-                },60*1000);
+                    var doNotRefresh = GM_getValue('doNotRefresh')
+                    console.log(doNotRefresh);
+                    if(!doNotRefresh){
+                        rfsh();
+                        setTimeout(function(){
+                            action();
+                        }, 10000);
+                    };
+                },30*1000);
                 //INCIDENTS/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             } else if (snInc !== null) {
                 console.log('AR and AT');
@@ -464,6 +471,7 @@ function RUNALL(){
                 };
 
                 function RFCPaste(){
+                    var txt;
                     console.log('repeating');
                     var rfcTimeEnd = GM_getValue('rfcTimeEnd');
                     var rfcNumber = GM_getValue('rfcNumber');
@@ -472,11 +480,16 @@ function RUNALL(){
                         var timeoutPaste;
                         timeoutPaste = setTimeout(RFCPaste, 1000);
                     } else {
+                        if(rfcNumber == false){
+                            txt = rfcNumberQuick;
+                        } else {
+                            txt = rfcNumber;
+                        };
                         console.log('CLEARING VALUES');
                         clearTimeout(timeoutPaste);
                         GM_setValue('rfcTimeEnd', false);
                         GM_setValue('rfcNumber', false);
-                        var text = "RFC#" + rfcNumber + "- closing incident on " + rfcTimeEnd + ".";
+                        var text = "RFC#" + txt + "- closing incident on " + rfcTimeEnd + ".";
                         var final = document.getElementById('incident.assigned_to')
                         var finalDisplay = document.getElementById('sys_display.incident.assigned_to');
                         var userID = document.getElementById('add_me_locked.incident.watch_list').getAttribute('data-user-id');
@@ -642,13 +655,13 @@ function RUNALL(){
                         change()
                     } else {
                         console.log('RESOLVING DONE');
-                        var tabs2 = document.getElementById('tabs2_section');
-                        var dest = tabs2.childNodes[2].childNodes[0];
-                        dest.click();
                     };
                 };
 
                 function check(x){
+                    var tabs2 = document.getElementById('tabs2_section');
+                    var dest = tabs2.childNodes[2].childNodes[0];
+                    dest.click();
                     if (incState.value != 2){
                         alert('Incident status must be "Work in Progress" before resolving it');
                     } else {
