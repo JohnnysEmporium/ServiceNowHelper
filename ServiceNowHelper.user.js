@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ServiceNow Helper
 // @namespace    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
-// @version      2.1.3
+// @version      2.1.4
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
@@ -375,6 +375,7 @@ function RUNALL(){
                     var labelsArrPos = [];
                     var date = [];
                     var splittedArr = [];
+                    console.log(labelsQuick);
                     GM_setValue('rfcTimeEnd', false);
                     GM_setValue('rfcNumber', false);
                     GM_setValue('isThereRfc', false);
@@ -469,7 +470,7 @@ function RUNALL(){
                     clearTimeout(timeoutPaste);
                     GM_setValue('rfcTimeEnd', false);
                     GM_setValue('rfcNumber', false);
-                    var text = "RFC#" + rfcNumber + "- closing incident on " + rfcTimeEnd + ".";
+                    var text = "RFC#" + rfcNumberQuick + "- closing incident on " + rfcTimeEnd + ".";
                     var final = document.getElementById('incident.assigned_to')
                     var finalDisplay = document.getElementById('sys_display.incident.assigned_to');
                     var userID = document.getElementById('add_me_locked.incident.watch_list').getAttribute('data-user-id');
@@ -822,7 +823,7 @@ function RUNALL(){
                     labelsNew.push(labels[j]);
                     labelsQuick1.push(labelsNew[k].nextSibling.textContent);
                     labelsQuick2.push(labelsNew[k].nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.innerText);
-                    labelsQuick.push([[labelsQuick1[k]], [labelsQuick2[k]]]);
+                    labelsQuick.push([[labelsQuick1[k]], [labelsQuick2[k]], [rfcNumber]]);
                     k++;
                 };
                 while(i < labelsNew.length){
