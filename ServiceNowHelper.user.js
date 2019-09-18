@@ -5,6 +5,7 @@
 // @description  Adds a few features to the Service Now console.
 // @author       Jan Sobczak
 // @match        https://arcelormittalprod.service-now.com/*
+// @match        https://arcelormittalqa.service-now.com/*
 // @match        http://web-expl.appliarmony.net/OSP/RFC/*
 // @downloadURL  https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
 // @updateURL    https://github.com/JohnyHCL/ServiceNowHelper/raw/master/ServiceNowHelper.user.js
